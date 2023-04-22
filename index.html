@@ -14,17 +14,6 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  div a {
-  display: inline-block;
-  width: calc(100% / 3);
-  margin: 5px;
-  text-align: center;
-  }
-}
-@media (max-width: 600px) {
-  div a {
-    width: 100%;
-  }
 }
 h1 {
   color: white;
@@ -35,6 +24,16 @@ h2 {
 }
 p {
   color: white;
+}
+.container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.container img {
+  margin: 10px;
+  max-width: 90vw;
+  height: auto;
 }
 </style>
 <body>
@@ -49,13 +48,13 @@ p {
 		<section>
 			<h2>pictures</h2>
 			<p>Here are some pictures：</p>
-			<div>
-				<a href="https://imgloc.com/i/iwxbkw"><img src="https://i.328888.xyz/2023/03/31/iwxbkw.th.png" alt="iwxbkw.png" border="0" /></a>
-				<a href="https://imgloc.com/i/izCHnQ"><img src="https://i.328888.xyz/2023/04/17/izCHnQ.th.jpeg" alt="izCHnQ.jpeg" border="0" /></a>
-				<a href="https://imgloc.com/i/iw3j1A"><img src="https://i.328888.xyz/2023/03/31/iw3j1A.th.jpeg" alt="iw3j1A.jpeg" border="0" /></a><br>
-				<a href="https://imgloc.com/i/iw3Sb5"><img src="https://i.328888.xyz/2023/03/31/iw3Sb5.th.jpeg" alt="iw3Sb5.jpeg" border="0" /></a>
-				<a href="https://imgloc.com/i/ieIlaq"><img src="https://i.328888.xyz/2023/04/17/ieIlaq.th.jpeg" alt="ieIlaq.jpeg" border="0" /></a>
-				<a href="https://imgloc.com/i/ie8rTt"><img src="https://i.328888.xyz/2023/04/17/ie8rTt.th.jpeg" alt="ie8rTt.jpeg" border="0" /></a><br>
+			<div class="container">
+				<a href="https://imgloc.com/i/iwxbkw"><img src="https://i.328888.xyz/2023/03/31/iwxbkw.th.png" alt="iwxbkw.png"></a>
+				<a href="https://imgloc.com/i/izCHnQ"><img src="https://i.328888.xyz/2023/04/17/izCHnQ.th.jpeg" alt="izCHnQ.jpeg"/></a>
+				<a href="https://imgloc.com/i/iw3j1A"><img src="https://i.328888.xyz/2023/03/31/iw3j1A.th.jpeg" alt="iw3j1A.jpeg"></a><br>
+				<a href="https://imgloc.com/i/iw3Sb5"><img src="https://i.328888.xyz/2023/03/31/iw3Sb5.th.jpeg" alt="iw3Sb5.jpeg"></a>
+				<a href="https://imgloc.com/i/ieIlaq"><img src="https://i.328888.xyz/2023/04/17/ieIlaq.th.jpeg" alt="ieIlaq.jpeg"></a>
+				<a href="https://imgloc.com/i/ie8rTt"><img src="https://i.328888.xyz/2023/04/17/ie8rTt.th.jpeg" alt="ie8rTt.jpeg"></a><br>
 				
 			</div>
 		</section>
