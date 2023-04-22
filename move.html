@@ -12,18 +12,24 @@
       position: absolute;
       width: auto;
       height: auto;
-      border: 10px solid black;
+      border: 10px solid #0077b3;
       border-radius: 10px;
       box-sizing: border-box;
       cursor: move;
     }
-    .photo.selected {
-    transform: scale(0.8);
-    transition: transform 0.2s ease-out;
-    }
   </style>
 </head>
+<style>
+body {
+  background-color: lightblue;
+  font-family: Comic Sans MS;
+}
+</style>
 <body>
+	<main>
+		<h1 style="color:white;text-align:left;margin-left:10px;">Love with camil ♡</h1>
+		<p style="color:white;text-align:left;margin-left:10px;">App camil and I share</p>
+	</main>
   <img class="photo" src="https://i.328888.xyz/2023/03/31/iw3Sb5.md.jpeg">
   <img class="photo" src="https://i.328888.xyz/2023/04/17/izCHnQ.md.jpeg">
   <img class="photo" src="https://i.328888.xyz/2023/03/31/iw3j1A.md.jpeg">
@@ -44,7 +50,6 @@
     function handleMouseDown(event) {
       dragging = true;
       dragTarget = this;
-      this.style.transform = 'scale(0.8)';
       offsetX = event.clientX - parseInt(this.style.left || 0);
       offsetY = event.clientY - parseInt(this.style.top || 0);
       // 将当前图片的 z-index 设为比其他图片更高的值，使其处于最上层
@@ -62,7 +67,6 @@
       dragTarget.style.top = (event.clientY - offsetY) + 'px';
     }
     function handleMouseUp(event) {
-      this.style.transform = 'scale(1)';
       dragging = false;
       dragTarget = null;
       // 将当前图片的 z-index 还原为原来的值
