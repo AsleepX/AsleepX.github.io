@@ -37,10 +37,25 @@ p {
   max-width: 25vw;
   height: auto;
   opacity: 0.8;
-}	
+}
+.button {
+      background-color: #ff6b6b;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      margin: 10px;
+      cursor: pointer;
+      position: fixed;
+      top: 0;
+      right: 0;
+      z-index: 1;
+    }
 </style>
 <body>
-	<a href="move.html"></a>
 	<main>
 		<h1 style="color:white;text-align:left;margin-left:10px;">Love with camil ♡</h1>
 		<p style="color:white;text-align:left;margin-left:10px;">App camil and I share</p>
@@ -62,8 +77,11 @@ p {
 			</div>
 		</section>
 	</main>
-	<button style="background-color: #404040; position: fixed; top: 20px; right: 20px; border: none;">
-    <span class="iconify" data-icon="feather:arrow-right" data-inline="false" style="color: black;"></span>
-  </button>
+	<script>
+        function moveToPage() {
+        location.href = "move.html";
+        }
+        </script>
+	<button onclick="moveToPage()" style="position:fixed;top:10px;right:10px;background-color:white;padding:10px;border-radius:10px;">move</button>
 </body>
 </html>
