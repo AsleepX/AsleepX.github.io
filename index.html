@@ -1,130 +1,57 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"> 
-	<title>Enjoy a happy day</title>
-	<link rel="shortcut icon" href="https://i.328888.xyz/2023/04/06/iN4SDJ.png">
+	<meta charset="UTF-8">
+	<title>我的个人网站</title>
 </head>
-
-<style>
-body {
-  background-color: lightblue;
-  font-family: Comic Sans MS;
-}
-</style>
-<style>
-a#link1 {
-  color: #5a7cc2;
-}
-a#link2 {
-  color: #5f8680;
-}
-h1 {
-  color: white;
-  font-weight: bold;
-}
-
-a.sh:hover {
-  animation-name: example;
-  animation-duration: 1s;
-  animation-fill-mode: forwards;
-}
-
-</style>
-
 <body>
+	<header>
+		<h1>欢迎来到我的个人网站！</h1>
+	</header>
+	<nav>
+		<ul>
+			<li><a href="#about">关于我</a></li>
+			<li><a href="#services">我的服务</a></li>
+			<li><a href="#portfolio">我的作品</a></li>
+			<li><a href="#contact">联系我</a></li>
+		</ul>
+	</nav>
 	<main>
-		<h1 style="color:white;text-align:left;margin-left:10px;">Love with camil ♡</h1>
-		<p style="color:white;text-align:left;margin-left:10px;">App camil and I share</p>
+		<section id="about">
+			<h2>关于我</h2>
+			<p>这里是一些关于我的介绍。</p>
+		</section>
+		<section id="services">
+			<h2>我的服务</h2>
+			<ul>
+				<li>服务1</li>
+				<li>服务2</li>
+				<li>服务3</li>
+			</ul>
+		</section>
+		<section id="portfolio">
+			<h2>我的作品</h2>
+			<ul>
+				<li><a href="#">作品1</a></li>
+				<li><a href="#">作品2</a></li>
+				<li><a href="#">作品3</a></li>
+			</ul>
+		</section>
+		<section id="contact">
+			<h2>联系我</h2>
+			<form action="#" method="post">
+				<label for="name">姓名：</label>
+				<input type="text" id="name" name="name" required><br>
+				<label for="email">电子邮件：</label>
+				<input type="email" id="email" name="email" required><br>
+				<label for="message">消息：</label>
+				<textarea id="message" name="message" required></textarea><br>
+				<input type="submit" value="发送">
+			</form>
+		</section>
 	</main>
-	    <script>
-		var iframe = document.createElement("iframe"); // 创建iframe元素
-		iframe.src = "5.html"; // 设置iframe的src属性
-		iframe.style.display = "none"; // 隐藏iframe元素
-		document.body.appendChild(iframe); // 将iframe元素添加到1.html中的body元素中
-
-		iframe.onload = function() { // 当iframe加载完成后执行以下代码
-			var div = iframe.contentDocument.getElementById("course"); // 获取5.html中指定id的元素
-			var text = div.innerText; // 获取元素的文本内容
-			var p = document.createElement("p"); // 创建新的p元素
-			var referenceElement = document.getElementById("AsleepX");
-			p.innerText = text; // 设置新的p元素的文本内容
-			p.style.position = "absolute"; // 将新元素的定位方式设置为绝对定位
-            p.style.left = (referenceElement.offsetLeft + referenceElement.offsetWidth + 20) + "px"; // 计算新元素的左边距
-            p.style.top = (referenceElement.offsetTop - 9) + "px"; // 计算新元素的上边距
-			p.style.color = "#ffffe0"; // 设置字体颜色为红色
-            p.style.fontSize = "16px"; // 设置字体大小为20像素
-			var parentElement = referenceElement.parentNode;
-			parentElement.insertBefore(p, referenceElement.nextSibling);
-			iframe.remove(); // 删除iframe元素
-		}
-        </script>
-		<script>
-		var iframe1 = document.createElement("iframe"); // 创建iframe元素
-		iframe1.src = "6.html"; // 设置iframe的src属性
-		iframe1.style.display = "none"; // 隐藏iframe元素
-		document.body.appendChild(iframe1); // 将iframe元素添加到1.html中的body元素中
-
-		iframe1.onload = function() { // 当iframe加载完成后执行以下代码
-			var div = iframe1.contentDocument.getElementById("course"); // 获取5.html中指定id的元素
-			var text = div.innerText; // 获取元素的文本内容
-			var p = document.createElement("p"); // 创建新的p元素
-			var referenceElement = document.getElementById("Camil");
-			p.innerText = text; // 设置新的p元素的文本内容
-			p.style.position = "absolute"; // 将新元素的定位方式设置为绝对定位
-            p.style.left = (referenceElement.offsetLeft + referenceElement.offsetWidth + 20) + "px"; // 计算新元素的左边距
-            p.style.top = (referenceElement.offsetTop - 9) + "px"; // 计算新元素的上边距
-			p.style.color = "#ffffe0"; // 设置字体颜色为红色
-            p.style.fontSize = "16px"; // 设置字体大小为20像素
-			var parentElement = referenceElement.parentNode;
-			parentElement.insertBefore(p, referenceElement.nextSibling);
-			iframe1.remove(); // 删除iframe元素
-		}
-	    </script>
-		<a id="link1" style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;">Camil:</a>
-	    <a id="link1" href="https://space.bilibili.com/431913627?spm_id_from=333.337.0.0" 
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;">bili</a>
-		<a id="link1" href="https://music.163.com/#/user/home?id=1841680499" 
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;">music</a><br><br>
-		<a href="6.html" id="Camil"
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;color:#5a7cc2;">course</a><br><br>
-		<a id="link2" style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;">AsleepX:</a>
-		<a id="link2" href="https://space.bilibili.com/290886972?spm_id_from=333.1007.0.0" 
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;">bili</a>
-		<a id="link2" href="https://music.163.com/#/user/home?id=4048179349" 
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;">music</a><br><br>
-		<a href="5.html" id="AsleepX"
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;color:#5f8680;">course</a><br><br>
-		<a href="https://i.328888.xyz/2023/03/31/iw3j1A.jpeg" class="sh"
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;color: white;">"Hug</a>
-		<a href="https://i.328888.xyz/2023/03/31/iw3Sb5.jpeg" class="sh"
-		style="text-align:left;margin-left:2px;font-size:24px;text-decoration:none;color: white;">me!</a>
-		<a href="https://i.328888.xyz/2023/03/31/iwxbkw.png" class="sh"
-		style="text-align:left;margin-left:2px;font-size:24px;text-decoration:none;color: white;">meow"</a><br><br>
-		<a href="3.html" class="sh"
-		style="text-align:left;margin-left:16px;font-size:24px;text-decoration:none;color: white;">Countdown to meet</a><br><br>
-        <a href="2.html" style="text-align:left;margin-left:160px;text-decoration:none;font-size:50px;color: white;" class="sh">→</a>
-<br>		
-<link rel="stylesheet" href="https://unpkg.com/gitalk/dist/gitalk.css">
-<script src="https://unpkg.com/gitalk/dist/gitalk.min.js"></script>
-
-<div id="gitalk-container"></div>
-<script>
-var gitalk = new Gitalk({
-  clientID: 'fe01fe976cd83c7ac2fa',
-
-  clientSecret: 'aea78ba7d970856dcfbe31e4529ad59490a24238',
-
-  repo: 'camiltalk',
-  owner: 'AsleepX',
-  admin: ['AsleepX'],
-  id: location.href,    
-  language:'en',  
-  distractionFreeMode: false
-})
-
-gitalk.render('gitalk-container')
-</script>   
+	<footer>
+		<p>版权所有 &copy; 2023 - 我的个人网站</p>
+	</footer>
 </body>
 </html>
