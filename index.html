@@ -1,127 +1,65 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>个人主页 | My Homepage</title>
-  </head>
-  <body>
-    <header>
-      <img src="https://imgloc.com/i/iw3Sb5" alt="My Avatar" />
-      <h1>你的姓名/昵称</h1>
-      <p>你的个人简介</p>
-    </header>
-/* Reset CSS样式 */
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-/* 布局 */
-header {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  text-align: center;
-  padding: 40px;
-  background-color: #f2f2f2;
-}
-
-main {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-section {
-  margin-bottom: 40px;
-}
-
-/* 标题 */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: Arial, sans-serif;
-}
-
-h1 {
-  font-size: 48px;
-  color: #333;
-  margin-top: 20px;
-}
-
-h2 {
-  font-size: 32px;
-  margin-bottom: 10px;
-}
-
-/* 链接 */
-a {
-  color: #333;
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-/* 列表 */
-ul {
-  list-style-type: none;
-  padding-left: 0;
-}
-
-li {
-  margin-bottom: 10px;
-}
-
-/* 底部 */
-footer {
-  text-align: center;
-  padding: 20px;
-  background-color: #f2f2f2;
-}
-    <main>
-      <!-- 联系方式 -->
-      <section>
-        <h2>联系我</h2>
-        <ul>
-          <li><a href="mailto:your-email@example.com">电子邮件</a></li>
-          <li><a href="tel:123-456-7890">电话</a></li>
-          <!-- 其他联系方式 -->
-          ...
-        </ul>
-      </section>
-
-      <!-- 社交媒体账号链接 -->
-      <section>
-        <h2>社交媒体</h2>
-        <ul>
-          <li><a href="https://www.github.com/your-github-id">GitHub</a></li>
-          <li><a href="https://www.linkedin.com/in/your-linkedin-id/">LinkedIn</a></li>
-          <!-- 其他社交媒体 -->
-          ...
-        </ul>
-      </section>
-
-      <!-- 项目/作品展示 -->
-      <section>
-        <h2>个人作品</h2>
-        <ul>
-          <li><a href="https://github.com/your-github-repo">你的GitHub项目</a></li>
-          <li><a href="https://codepen.io/your-codepen-id">你的CodePen作品</a></li>
-          <!-- 其他展示方式 -->
-          ...
-        </ul>
-      </section>
-	    
-    </main>
-
-    <footer>
-      <p>&copy;2023 your name. All rights reserved.</p>
-    </footer>
-  </body>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>My Personal Website</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
+	<style>
+		/* Customize CSS here */
+	</style>
+</head>
+<body>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-6">
+				<img src="image.jpg" alt="My Photo">
+			</div>
+			<div class="col-md-6">
+				<h1 class="animated fadeInDown">Welcome to My Personal Website</h1>
+				<p class="animated fadeInUp">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam ac rutrum metus. Vivamus hendrerit metus et leo facilisis bibendum. Vestibulum sed vestibulum arcu. Nulla non lacinia arcu. Nam vitae porttitor quam.</p>
+			</div>
+		</div>
+		<hr>
+		<div class="row">
+			<div class="col-md-4">
+				<i class="fa fa-book fa-5x animated bounce"></i>
+				<h2>My Skills</h2>
+				<p>Here are some of my skills:</p>
+				<ul>
+					<li>Web Development</li>
+					<li>Graphic Design</li>
+					<li>Digital Marketing</li>
+				</ul>
+			</div>
+			<div class="col-md-4">
+				<i class="fa fa-certificate fa-5x animated bounce"></i>
+				<h2>My Certifications</h2>
+				<p>Here are some of my certifications:</p>
+				<ul>
+					<li>Google Analytics</li>
+					<li>Adobe Photoshop</li>
+					<li>HubSpot Inbound Marketing</li>
+				</ul>
+			</div>
+			<div class="col-md-4">
+				<i class="fa fa-comments fa-5x animated bounce"></i>
+				<h2>Contact Me</h2>
+				<p>Here is how you can contact me:</p>
+				<ul>
+					<li>Email: me@example.com</li>
+					<li>Phone: 123-456-7890</li>
+					<li>Address: 123 Main St, Anytown USA</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+	<script>
+		new WOW().init();
+	</script>
+</body>
 </html>
