@@ -1,87 +1,127 @@
 <!DOCTYPE html>
 <html>
-<head>
-	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@iconify/iconify@3.1.0/dist/iconify.min.css">
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"> 
-	<title>photo show</title>
-	<link rel="shortcut icon" href="https://i.328888.xyz/2023/04/22/ih7kxy.png">
-</head>
-<style>
-body {
-  background-color: black;
-  font-family: Comic Sans MS;
-  background-image: url("https://i.328888.xyz/2023/04/17/izCHnQ.jpeg");
-  background-position: top center;
-  background-repeat: no-repeat;
-  background-size: contain;
-  background-attachment: fixed;
+  <head>
+    <title>个人主页 | My Homepage</title>
+  </head>
+  <body>
+    <header>
+      <img src="https://imgloc.com/i/iw3Sb5" alt="My Avatar" />
+      <h1>你的姓名/昵称</h1>
+      <p>你的个人简介</p>
+    </header>
+/* Reset CSS样式 */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
-h1 {
-  color: white;
-  font-weight: bold;
-}
-h2 {
-  color: white;
-}
-p {
-  color: white;
-}
-.container {
+
+/* 布局 */
+header {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 40px;
+  background-color: #f2f2f2;
 }
-.container img {
-  margin: 5px;
-  max-width: 25vw;
-  height: auto;
-  opacity: 0.8;
+
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px;
 }
-.button {
-      background-color: #ff6b6b;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      text-align: center;
-      text-decoration: none;
-      display: inline-block;
-      font-size: 16px;
-      margin: 10px;
-      cursor: pointer;
-      position: fixed;
-      top: 0;
-      right: 0;
-      z-index: 1;
-    }
-</style>
-<body>
-	<main>
-		<h1 style="color:white;text-align:left;margin-left:10px;">Love with camil ♡</h1>
-		<p style="color:white;text-align:left;margin-left:10px;">App camil and I share</p>
-	</main>
-	<header>
-		<h2 style="color:white;text-align:left;margin-left:10px;">Welcome to photo show site！</h2>
-	</header>
-	<main>
-		<section>
-			<p style="color:white;text-align:left;margin-left:10px;">Here are some pictures：</p>
-			<div class="container">
-				<a href="https://imgloc.com/i/iwxbkw"><img src="https://i.328888.xyz/2023/03/31/iwxbkw.th.png" alt="iwxbkw.png" border="0" /></a>
-				<a href="https://imgloc.com/i/izCHnQ"><img src="https://i.328888.xyz/2023/04/17/izCHnQ.th.jpeg" alt="izCHnQ.jpeg" border="0" /></a>
-				<a href="https://imgloc.com/i/iw3j1A"><img src="https://i.328888.xyz/2023/03/31/iw3j1A.th.jpeg" alt="iw3j1A.jpeg" border="0" /></a><br>
-				<a href="https://imgloc.com/i/iw3Sb5"><img src="https://i.328888.xyz/2023/03/31/iw3Sb5.th.jpeg" alt="iw3Sb5.jpeg" border="0" /></a>
-				<a href="https://imgloc.com/i/ieIlaq"><img src="https://i.328888.xyz/2023/04/17/ieIlaq.th.jpeg" alt="ieIlaq.jpeg" border="0" /></a>
-				<a href="https://imgloc.com/i/ie8rTt"><img src="https://i.328888.xyz/2023/04/17/ie8rTt.th.jpeg" alt="ie8rTt.jpeg" border="0" /></a><br>
-				
-			</div>
-		</section>
-	</main>
-	<script>
-        function moveToPage() {
-        location.href = "move.html";
-        }
-        </script>
-	<button onclick="moveToPage()" style="position:fixed;top:20px;right:10px;background-color:#404040;padding:10px;border-radius:10px;opacity:0.5;">move</button>
-</body>
+
+section {
+  margin-bottom: 40px;
+}
+
+/* 标题 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  font-size: 48px;
+  color: #333;
+  margin-top: 20px;
+}
+
+h2 {
+  font-size: 32px;
+  margin-bottom: 10px;
+}
+
+/* 链接 */
+a {
+  color: #333;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* 列表 */
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+li {
+  margin-bottom: 10px;
+}
+
+/* 底部 */
+footer {
+  text-align: center;
+  padding: 20px;
+  background-color: #f2f2f2;
+}
+    <main>
+      <!-- 联系方式 -->
+      <section>
+        <h2>联系我</h2>
+        <ul>
+          <li><a href="mailto:your-email@example.com">电子邮件</a></li>
+          <li><a href="tel:123-456-7890">电话</a></li>
+          <!-- 其他联系方式 -->
+          ...
+        </ul>
+      </section>
+
+      <!-- 社交媒体账号链接 -->
+      <section>
+        <h2>社交媒体</h2>
+        <ul>
+          <li><a href="https://www.github.com/your-github-id">GitHub</a></li>
+          <li><a href="https://www.linkedin.com/in/your-linkedin-id/">LinkedIn</a></li>
+          <!-- 其他社交媒体 -->
+          ...
+        </ul>
+      </section>
+
+      <!-- 项目/作品展示 -->
+      <section>
+        <h2>个人作品</h2>
+        <ul>
+          <li><a href="https://github.com/your-github-repo">你的GitHub项目</a></li>
+          <li><a href="https://codepen.io/your-codepen-id">你的CodePen作品</a></li>
+          <!-- 其他展示方式 -->
+          ...
+        </ul>
+      </section>
+	    
+    </main>
+
+    <footer>
+      <p>&copy;2023 your name. All rights reserved.</p>
+    </footer>
+  </body>
 </html>
