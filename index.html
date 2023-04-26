@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<title>My Personal Website</title>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://at.alicdn.com/t/font_2925497_kom2jk5k1r.css">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.2/animate.min.css">
 	<style>
 		/* Customize CSS here */
@@ -24,7 +24,9 @@
 		<hr>
 		<div class="row">
 			<div class="col-md-4">
-				<i class="fa fa-book fa-5x animated bounce"></i>
+				<svg class="icon" aria-hidden="true">
+					<use xlink:href="#icon-skill"></use>
+				</svg>
 				<h2>My Skills</h2>
 				<p>Here are some of my skills:</p>
 				<ul>
@@ -34,7 +36,9 @@
 				</ul>
 			</div>
 			<div class="col-md-4">
-				<i class="fa fa-certificate fa-5x animated bounce"></i>
+				<svg class="icon" aria-hidden="true">
+					<use xlink:href="#icon-certificate"></use>
+				</svg>
 				<h2>My Certifications</h2>
 				<p>Here are some of my certifications:</p>
 				<ul>
@@ -44,14 +48,14 @@
 				</ul>
 			</div>
 			<div class="col-md-4">
-				<i class="fa fa-comments fa-5x animated bounce"></i>
+				<svg class="icon" aria-hidden="true">
+					<use xlink:href="#icon-contact"></use>
+				</svg>
 				<h2>Contact Me</h2>
 				<p>Here is how you can contact me:</p>
-				<ul>
-					<li>Email: me@example.com</li>
-					<li>Phone: 123-456-7890</li>
-					<li>Address: 123 Main St, Anytown USA</li>
-				</ul>
+				<a href="mailto:me@example.com" class="btn btn-primary"><i class="fa fa-envelope"></i> Email</a><br><br>
+    			<a href="tel:123-456-7890" class="btn btn-primary"><i class="fa fa-phone"></i> Phone</a><br><br>
+    			<p><i class="fa fa-map-marker"></i> Address: 123 Main St, Anytown USA</p>
 			</div>
 		</div>
 	</div>
