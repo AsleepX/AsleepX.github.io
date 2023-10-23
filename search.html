@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search</title>
+    <link rel="shortcut icon" href="https://s2.loli.net/2023/10/08/jlO41Sbn3zUIseM.png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            padding: 10px;
+            border-radius: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+        }
+        input[type="text"] {
+            padding: 10px 35px 10px 45px; /* Adjusted padding for icon space */
+            border: none;
+            border-radius: 15px;
+            outline: none;
+            font-size: 16px;
+            width: 300px;
+        }
+        input[type="submit"] {
+            padding: 10px 15px;
+            margin-left: 10px;
+            border: none;
+            border-radius: 15px;
+            background-color: #5A67D8;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        input[type="submit"]:hover {
+            background-color: #434190;
+        }
+
+        /* Additional styles for search engine icon */
+        .input-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .engine-icon {
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background-size: cover;
+            cursor: pointer;
+        }
+
+        #engineIcon.bing {
+            background-image: url('https://s2.loli.net/2023/10/08/jlO41Sbn3zUIseM.png');
+        }
+
+        #engineIcon.google {
+            background-image: url('https://www.google.com/favicon.ico'); /* Example Google favicon URL */
+        }
+
+    </style>
+</head>
+<body>
+
+<form action="https://www.bing.com/search" method="get" id="searchForm">
+    <div class="input-container">
+        <div id="engineIcon" class="engine-icon bing" onclick="toggleSearchEngine()"></div>
+        <input type="text" name="q" placeholder="" id="searchBox">
+    </div>
+    <input type="submit" value="search">
+</form>
+
+<script>
+let currentEngine = 'bing';
+
+function toggleSearchEngine() {
+    const searchForm = document.getElementById('searchForm');
+    const searchIcon = document.getElementById('engineIcon');
+
+    if (currentEngine === 'bing') {
+        searchForm.action = "https://www.google.com/search";
+        searchIcon.classList.remove('bing');
+        searchIcon.classList.add('google');
+        currentEngine = 'google';
+    } else {
+        searchForm.action = "https://www.bing.com/search";
+        searchIcon.classList.remove('google');
+        searchIcon.classList.add('bing');
+        currentEngine = 'bing';
+    }
+}
+</script>
+
+</body>
+</html>
