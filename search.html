@@ -72,6 +72,21 @@
             background-image: url('https://www.google.com/favicon.ico'); /* Example Google favicon URL */
         }
 
+        .websites-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
+        }
+    
+        .website-icon {
+            width: 32px;
+            height: 32px;
+            margin: 0 10px;
+            background-size: cover;
+            cursor: pointer;
+            border-radius: 50%;  /* optional, to make icons circular */
+        }
+        
     </style>
 </head>
 <body>
@@ -84,6 +99,13 @@
     <input type="submit" value="search">
 </form>
 
+<div class="websites-container">
+    <a href="https://www.bilibili.com/" target="_blank" class="website-icon" style="background-image: url('https://www.bilibili.com/favicon.ico');"></a>
+    <a href="https://portal.sufe.edu.cn/" target="_blank" class="website-icon" style="background-image: url('https://portal.sufe.edu.cn/favicon.ico');"></a>
+    <a href="https://canvas.shufe.edu.cn/" target="_blank" class="website-icon" style="background-image: url('https://canvas.shufe.edu.cn/favicon.ico');"></a>
+    <!-- Add more icons by replicating the above line and changing the href and background-image values -->
+</div>
+        
 <script>
 let currentEngine = 'bing';
 
@@ -104,6 +126,6 @@ function toggleSearchEngine() {
     }
 }
 </script>
-
+    
 </body>
 </html>
