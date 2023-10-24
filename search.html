@@ -27,6 +27,8 @@
             display: flex;
             justify-content: flex-start;
         }
+
+        .folder-content a,
         .favorites-bar a {
             margin-right: 15px;
             font-weight: bold;
@@ -34,8 +36,42 @@
             color: black;
         }
 
+        .folder-content a:first-child,
         .favorites-bar a:first-child {
             margin-left: 15px;
+        }
+
+        .folder {
+            position: relative;
+            display: inline-block;
+        }
+
+        .folder-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: #ffffff;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+
+        .folder-content a {
+            display: block;
+            padding: 5px 10px;
+        }
+
+        .folder-icon {
+            transition: transform 0.3s;
+        }
+
+        .folder.open .folder-content {
+            display: block;
+        }
+
+        .folder.open .folder-icon {
+            transform: rotate(180deg);
         }
         
         form {
@@ -48,7 +84,7 @@
             box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
         }
         input[type="text"] {
-            padding: 10px 35px 10px 45px; /* Adjusted padding for icon space */
+            padding: 10px 35px 10px 45px;
             border: none;
             border-radius: 15px;
             outline: none;
@@ -70,7 +106,6 @@
             background-color: #434190;
         }
 
-        /* Additional styles for search engine icon */
         .input-container {
             position: relative;
             display: inline-block;
@@ -110,6 +145,13 @@
     <a href="https://www.file.io/" target="_blank" >file</a>
     <a href="https://math.solverer.com/library/dimitris_bertsimas/introduction_to_linear_optimization?utm_source=reddit&utm_medium=link" target="_blank" >LP</a>
     <a href="https://sakurabaseira.github.io/Simplex-Online/index.html" target="_blank" >LPsolve</a>
+    <div class="folder">
+            <a href="#" class="folder-title">My Folder <span class="folder-icon">▼</span></a>
+            <div class="folder-content">
+                <a href="https://example1.com/" target="_blank">Example 1</a>
+                <a href="https://example2.com/" target="_blank">Example 2</a>
+            </div>
+    </div>
 </div>
 
 <form action="https://www.bing.com/search" method="get" id="searchForm">
@@ -139,6 +181,13 @@ function toggleSearchEngine() {
         currentEngine = 'bing';
     }
 }
+
+document.querySelector('.folder-title').addEventListener('click', function(e) {
+            e.preventDefault();
+            const folder = document.querySelector('.folder');
+            folder.classList.toggle('open');
+});
+    
 </script>
     
 </body>
