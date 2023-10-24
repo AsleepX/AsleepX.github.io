@@ -15,6 +15,22 @@
             align-items: center;
             background-color: #f4f4f4;
         }
+
+        .favorites-bar {
+            width: 100%;
+            background-color: #ffffff;
+            padding: 10px 0;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            justify-content: center;
+        }
+        .favorites-bar a {
+            margin: 0 10px;
+        }
+        
         form {
             display: flex;
             justify-content: center;
@@ -71,25 +87,16 @@
         #engineIcon.google {
             background-image: url('https://www.google.com/favicon.ico'); /* Example Google favicon URL */
         }
-
-        .websites-container {
-        display: flex;
-        justify-content: center;
-        margin-top: 20px;
-        }
-    
-        .website-icon {
-            width: 32px;
-            height: 32px;
-            margin: 0 10px;
-            background-size: cover;
-            cursor: pointer;
-            border-radius: 50%;  /* optional, to make icons circular */
-        }
         
     </style>
 </head>
 <body>
+
+<div class="favorites-bar">
+    <a href="https://www.bilibili.com/" target="_blank" class="website-icon" style="background-image: url('https://www.bilibili.com/favicon.ico');"></a>
+    <a href="https://portal.sufe.edu.cn/" target="_blank" class="website-icon" style="background-image: url('https://portal.sufe.edu.cn/favicon.ico');"></a>
+    <a href="https://canvas.shufe.edu.cn/" target="_blank" class="website-icon" style="background-image: url('https://canvas.shufe.edu.cn/favicon.ico');"></a>
+</div>
 
 <form action="https://www.bing.com/search" method="get" id="searchForm">
     <div class="input-container">
@@ -98,13 +105,6 @@
     </div>
     <input type="submit" value="search">
 </form>
-
-<div class="websites-container">
-    <a href="https://www.bilibili.com/" target="_blank" class="website-icon" style="background-image: url('https://www.bilibili.com/favicon.ico');"></a>
-    <a href="https://portal.sufe.edu.cn/" target="_blank" class="website-icon" style="background-image: url('https://portal.sufe.edu.cn/favicon.ico');"></a>
-    <a href="https://canvas.shufe.edu.cn/" target="_blank" class="website-icon" style="background-image: url('https://canvas.shufe.edu.cn/favicon.ico');"></a>
-    <!-- Add more icons by replicating the above line and changing the href and background-image values -->
-</div>
         
 <script>
 let currentEngine = 'bing';
