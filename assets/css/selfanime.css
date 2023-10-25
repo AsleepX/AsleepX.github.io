@@ -28,6 +28,19 @@ body, html {
     display: flex;
     flex-direction: column;
     justify-content: center; 
+    padding-bottom: 30px;
+}
+
+.text-section::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 70%; /* 横线宽度 */
+    height: 5px; /* 横线高度 */
+    background-color: yellow;
+    border-radius: 50px; /* 给横线弧度 */
+    transform: translateX(-50%); /* 横线居中 */
 }
 
 h2 {
