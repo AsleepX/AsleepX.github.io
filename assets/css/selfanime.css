@@ -28,31 +28,17 @@ body, html {
     display: flex;
     flex-direction: column;
     justify-content: center; 
-    padding-bottom: 30px;
 }
-
-.text-section::after {
-    content: '';
-    position: absolute;
-    bottom: -10px; /* 调整位置离文本框的距离 */
-    left: 50%;
-    width: 70%; /* 横线宽度 */
-    height: 5px; /* 横线高度 */
-    background-color: black; /* 黄色更改为黑色 */
-    border-radius: 50px; /* 给横线弧度 */
-    transform: translateX(-50%); /* 横线居中 */
-}
-
 
 h2 {
     color: #333;
     margin-bottom: 10px;
-    font-size: 2em;
+    font-size: 1.5em;
 }
 
 p {
     color: #666;
-    font-size: 2em;
+    font-size: 1.5em;
 }
 
 .image-section {
