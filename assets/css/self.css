@@ -12,6 +12,7 @@
 
 .menu-list li {
     margin: 10px 0;
+    margin-bottom: 10px;
 }
 
 .menu-list li a {
@@ -26,4 +27,11 @@
 .menu-list li a:hover {
     background-color: #333;
     color: #fff;
+}
+
+body {
+    background-image: url('assets/images/bg-1.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center center;
 }
