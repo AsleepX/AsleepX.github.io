@@ -16,7 +16,7 @@ body {
     flex: 1;
     position: relative;
     width: 600px; /* 或者其他的固定大小 */
-    height: 400px; /* 或者其他的固定大小 */
+    height: 800px; /* 或者其他的固定大小 */
     overflow: hidden;
 }
 
