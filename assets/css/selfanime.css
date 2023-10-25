@@ -52,4 +52,5 @@ p {
     max-width: 80%;
     height: auto;
     display: none; 
+    border-radius: 10px;
 }
