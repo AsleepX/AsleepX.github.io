@@ -1,22 +1,31 @@
-body {
+body, html {
+    height: 100%;
+    margin: 0;
     font-family: Arial, sans-serif;
 }
 
 .container {
     display: flex;
-    justify-content: space-between;
-}
-
-.text-section {
-    flex: 1;
+    justify-content: center; /* 水平居中 */
+    align-items: flex-start; /* 使文本和图片在上面对齐 */
+    height: 100%;
     padding: 20px;
 }
 
+.text-section, .image-section {
+    margin: 0 20px; /* 为了给两个部分之间增加一些间隙 */
+}
+
+.text-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* 垂直居中文本内容 */
+}
+
 .image-section {
-    flex: 1;
     position: relative;
-    width: 600px; /* 或者其他的固定大小 */
-    height: 1000px; /* 或者其他的固定大小 */
+    width: 400px; /* 或者其他的固定大小 */
+    height: 300px; /* 或者其他的固定大小 */
     overflow: hidden;
 }
 
@@ -27,4 +36,3 @@ body {
     object-fit: cover;
     display: none; /* 默认所有图片都隐藏 */
 }
-
