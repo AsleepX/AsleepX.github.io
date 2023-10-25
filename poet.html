@@ -12,6 +12,11 @@
             overflow: hidden;
         }
 
+        .center-text {
+            position: relative;
+            z-index: -1; /* 保持文本在图片之后 */
+        }
+        
         .draggable {
             position: absolute;
             width: 400px; /* 调整为你需要的大小 */
@@ -22,6 +27,20 @@
 </head>
 
 <body>
+
+    <div class="center-text">
+        山谷中受惊会开花的树<br>
+        扁宽的木船在直的墨山中间划着<br>
+        抬头正上方高处<br>
+        两侧峭壁分别长着两棵瘦树<br>
+        暗绿色小的叶<br>
+        船驶过<br>
+        突然其中一棵树的所有叶子都变成了稍大的<br>
+        粉色浓密的花<br>
+        船夫说<br>
+        这种树受到惊吓就会开花<br>
+    </div>
+    
     <img class="draggable" src="assets/images/drag1.jpg" alt="Image 1">
     <img class="draggable" src="assets/images/drag2.jpg" alt="Image 2">
     <img class="draggable" src="assets/images/drag3.jpg" alt="Image 3">
@@ -38,6 +57,7 @@
             let currentImage = null;
             let offsetX = 0;
             let offsetY = 0;
+            let highestZIndex = 0;
 
             document.querySelectorAll(".draggable").forEach(img => {
                 img.addEventListener("mousedown", (e) => {
@@ -45,6 +65,8 @@
                     currentImage = img;
                     offsetX = e.clientX - img.getBoundingClientRect().left;
                     offsetY = e.clientY - img.getBoundingClientRect().top;
+                    highestZIndex++;
+                    img.style.zIndex = highestZIndex;
                 });
 
                 img.addEventListener("mouseup", () => {
