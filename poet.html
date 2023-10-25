@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draggable Images</title>
+    <style>
+        body {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .draggable {
+            position: absolute;
+            width: 150px; /* 调整为你需要的大小 */
+            cursor: pointer;
+            user-select: none;
+        }
+    </style>
+</head>
+
+<body>
+    <img class="draggable" src="assets/images/drag1.jpg" alt="Image 1">
+    <img class="draggable" src="assets/images/drag2.jpg" alt="Image 2">
+    <img class="draggable" src="assets/images/drag3.jpg" alt="Image 3">
+    <img class="draggable" src="assets/images/drag4.jpg" alt="Image 4">
+    <img class="draggable" src="assets/images/drag5.jpg" alt="Image 5">
+    <img class="draggable" src="assets/images/drag6.jpg" alt="Image 6">
+    <img class="draggable" src="assets/images/drag7.jpg" alt="Image 7">
+    <img class="draggable" src="assets/images/drag8.jpg" alt="Image 8">
+    <!-- 你可以添加更多图片 -->
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let isDragging = false;
+            let currentImage = null;
+            let offsetX = 0;
+            let offsetY = 0;
+
+            document.querySelectorAll(".draggable").forEach(img => {
+                img.addEventListener("mousedown", (e) => {
+                    isDragging = true;
+                    currentImage = img;
+                    offsetX = e.clientX - img.getBoundingClientRect().left;
+                    offsetY = e.clientY - img.getBoundingClientRect().top;
+                });
+
+                img.addEventListener("mouseup", () => {
+                    isDragging = false;
+                    currentImage = null;
+                });
+            });
+
+            document.addEventListener("mousemove", (e) => {
+                if (isDragging && currentImage) {
+                    let x = e.clientX - offsetX;
+                    let y = e.clientY - offsetY;
+                    currentImage.style.left = x + "px";
+                    currentImage.style.top = y + "px";
+                }
+            });
+
+            // 防止在拖动过程中选中其他内容
+            document.addEventListener("selectstart", (e) => {
+                if (isDragging) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
