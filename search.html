@@ -28,7 +28,6 @@
             justify-content: flex-start;
         }
 
-        .folder-content a,
         .favorites-bar a {
             margin-right: 15px;
             font-weight: bold;
@@ -36,42 +35,8 @@
             color: black;
         }
 
-        .folder-content a:first-child,
         .favorites-bar a:first-child {
             margin-left: 15px;
-        }
-
-        .folder {
-            position: relative;
-            display: inline-block;
-        }
-
-        .folder-content {
-            display: none;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background-color: #ffffff;
-            border: 1px solid #ccc;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            z-index: 1;
-        }
-
-        .folder-content a {
-            display: block;
-            padding: 5px 10px;
-        }
-
-        .folder-icon {
-            transition: transform 0.3s;
-        }
-
-        .folder.open .folder-content {
-            display: block;
-        }
-
-        .folder.open .folder-icon {
-            transform: rotate(180deg);
         }
         
         form {
@@ -129,6 +94,10 @@
         #engineIcon.google {
             background-image: url('https://www.google.com/favicon.ico'); 
         }
+
+        #engineIcon.url {
+        background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text x="0" y="70" font-family="Arial" font-size="60" fill="%23000000">http</text></svg>');
+        }
         
     </style>
 </head>
@@ -151,17 +120,6 @@
     <a href="https://blog.csdn.net/LCCFlccf/article/details/89643585" target="_blank" >Oblatex</a>
     <a href="https://zhuanlan.zhihu.com/p/336678751" target="_blank" >Obuse</a>
     <a href="https://www.jianguoyun.com/d/home#/" target="_blank" >Nutstore</a>
-      
-<!--
-    <div class="folder">
-            <a href="#" class="folder-title">Obsidian<span class="folder-icon">📁</span></a>
-            <div class="folder-content">
-                <a href="https://blog.csdn.net/LCCFlccf/article/details/89643585" target="_blank">Latex</a>
-                <a href="https://www.jianguoyun.com/d/home#/" target="_blank">Nutstore</a>
-                <a href="https://zhuanlan.zhihu.com/p/336678751" target="_blank">Use</a>
-            </div>
-    </div>
--->
     
 </div>
 
@@ -181,8 +139,13 @@ function toggleSearchEngine() {
     const searchIcon = document.getElementById('engineIcon');
 
     if (currentEngine === 'bing') {
-        searchForm.action = "https://www.google.com/search";
+        searchForm.action = "javascript:void(0)";
         searchIcon.classList.remove('bing');
+        searchIcon.classList.add('url');
+        currentEngine = 'url';
+    } else if (currentEngine === 'url') {
+        searchForm.action = "https://www.google.com/search";
+        searchIcon.classList.remove('url');
         searchIcon.classList.add('google');
         currentEngine = 'google';
     } else {
@@ -193,12 +156,14 @@ function toggleSearchEngine() {
     }
 }
 
-document.querySelector('.folder-title').addEventListener('click', function(e) {
-            e.preventDefault();
-            const folder = document.querySelector('.folder');
-            folder.classList.toggle('open');
+document.getElementById('searchForm').addEventListener('submit', function(e) {
+    if (currentEngine === 'url') {
+        e.preventDefault();
+        const query = document.getElementById('searchBox').value;
+        window.location.href = `https://${query}`;
+    }
 });
-    
+
 </script>
     
 </body>
