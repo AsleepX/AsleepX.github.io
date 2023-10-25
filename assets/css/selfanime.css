@@ -43,7 +43,7 @@ p {
     position: relative;
     overflow: hidden;
     display: flex;
-    align-items: center; /* 使图片垂直居中 */
+    align-items: center; 
 }
 
 .anime-image {
