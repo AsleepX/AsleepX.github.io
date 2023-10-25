@@ -11,4 +11,4 @@ function changeImage() {
 images[0].style.display = 'block';
 
 // 设置循环切换图片的间隔时间
-setInterval(changeImage, 3000); // 每3秒切换一次图片
+setInterval(changeImage, 5000); // 每3秒切换一次图片
