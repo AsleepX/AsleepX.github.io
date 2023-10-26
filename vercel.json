@@ -1,0 +1,5 @@
+{
+  "routes": [
+    { "src": "/s", "dest": "/search.html" }
+  ]
+}
