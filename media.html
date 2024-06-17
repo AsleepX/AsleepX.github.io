@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Media</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 50px;
+        }
+        video {
+            width: 80%;
+            max-width: 600px;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+        button {
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>本地视频播放器</h1>
+    <input type="file" id="fileInput" accept="video/*">
+    <video id="video" controls></video>
+    <div class="controls">
+        <button onclick="stepBackward()">逐帧回退</button>
+        <button onclick="stepForward()">逐帧快进</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const fileInput = document.getElementById('fileInput');
+
+        fileInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+            }
+        });
+
+        function stepForward() {
+            // 每次快进0.033秒（约30帧/秒）
+            video.currentTime += 0.033;
+        }
+
+        function stepBackward() {
+            // 每次回退0.033秒（约30帧/秒）
+            video.currentTime -= 0.033;
+        }
+    </script>
+</body>
+</html>
