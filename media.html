@@ -9,7 +9,6 @@
             margin: 0;
             background-color: #000;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
@@ -21,46 +20,32 @@
             object-fit: contain;
             background-color: #000;
         }
-        .controls {
-            position: fixed;
-            bottom: 20px;
-            display: flex;
-            justify-content: center;
-            width: 100%;
-        }
         input[type="file"] {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-        }
-        button {
-            padding: 10px 20px;
-            margin: 0 10px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #0056b3;
+            display: none;
         }
     </style>
 </head>
 <body>
     <input type="file" id="fileInput" accept="video/*">
     <video id="video" controls></video>
-    <div class="controls">
-        <button onclick="stepBackward()">Step Backward (D)</button>
-        <button onclick="stepForward()">Step Forward (F)</button>
-    </div>
 
     <script>
         const video = document.getElementById('video');
         const fileInput = document.getElementById('fileInput');
+
+        document.addEventListener('keydown', (event) => {
+            // Check if Ctrl + A is pressed
+            if (event.ctrlKey && event.key === 'a') {
+                event.preventDefault();
+                fileInput.click();
+            }
+
+            if (event.key === 'd' || event.key === 'D') {
+                stepBackward();
+            } else if (event.key === 'f' || event.key === 'F') {
+                stepForward();
+            }
+        });
 
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -79,14 +64,6 @@
             // Each step is 0.033 seconds (about 30 frames per second)
             video.currentTime -= 0.033;
         }
-
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'd' || event.key === 'D') {
-                stepBackward();
-            } else if (event.key === 'f' || event.key === 'F') {
-                stepForward();
-            }
-        });
     </script>
 </body>
 </html>
