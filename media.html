@@ -6,32 +6,33 @@
     <title>Local Video Player</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #000;
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f0f0f0;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            color: #333;
-        }
-        #videoContainer {
-            width: 80%;
-            max-width: 800px;
-            margin-top: 20px;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
         }
         video {
             width: 100%;
-            border: 1px solid #ccc;
-            border-radius: 8px;
+            height: 100%;
+            object-fit: contain;
             background-color: #000;
         }
         .controls {
-            margin-top: 10px;
+            position: fixed;
+            bottom: 20px;
             display: flex;
             justify-content: center;
+            width: 100%;
+        }
+        input[type="file"] {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 10;
         }
         button {
             padding: 10px 20px;
@@ -50,14 +51,11 @@
     </style>
 </head>
 <body>
-    <h1>Local Video Player</h1>
     <input type="file" id="fileInput" accept="video/*">
-    <div id="videoContainer">
-        <video id="video" controls></video>
-    </div>
+    <video id="video" controls></video>
     <div class="controls">
-        <button onclick="stepBackward()">Step Backward</button>
-        <button onclick="stepForward()">Step Forward</button>
+        <button onclick="stepBackward()">Step Backward (D)</button>
+        <button onclick="stepForward()">Step Forward (F)</button>
     </div>
 
     <script>
@@ -81,6 +79,14 @@
             // Each step is 0.033 seconds (about 30 frames per second)
             video.currentTime -= 0.033;
         }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'd' || event.key === 'D') {
+                stepBackward();
+            } else if (event.key === 'f' || event.key === 'F') {
+                stepForward();
+            }
+        });
     </script>
 </body>
 </html>
