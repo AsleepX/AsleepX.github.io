@@ -23,6 +23,11 @@
         input[type="file"] {
             display: none;
         }
+        /* 添加拖放指示样式 */
+        .dragging {
+            border: 4px dashed #fff;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -32,9 +37,9 @@
     <script>
         const video = document.getElementById('video');
         const fileInput = document.getElementById('fileInput');
+        const body = document.body;
 
         document.addEventListener('keydown', (event) => {
-            // Check if Ctrl + A is pressed
             if (event.ctrlKey && event.key === 'a') {
                 event.preventDefault();
                 fileInput.click();
@@ -56,14 +61,32 @@
         });
 
         function stepForward() {
-            // Each step is 0.033 seconds (about 30 frames per second)
             video.currentTime += 0.033;
         }
 
         function stepBackward() {
-            // Each step is 0.033 seconds (about 30 frames per second)
             video.currentTime -= 0.033;
         }
+
+        // 拖放功能
+        body.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            body.classList.add('dragging');
+        });
+
+        body.addEventListener('dragleave', () => {
+            body.classList.remove('dragging');
+        });
+
+        body.addEventListener('drop', (event) => {
+            event.preventDefault();
+            body.classList.remove('dragging');
+            const file = event.dataTransfer.files[0];
+            if (file && file.type.startsWith('video/')) {
+                const url = URL.createObjectURL(file);
+                video.src = url;
+            }
+        });
     </script>
 </body>
 </html>
