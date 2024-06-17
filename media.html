@@ -1,35 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Media</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Video Player</title>
     <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 50px;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        #videoContainer {
+            width: 80%;
+            max-width: 800px;
+            margin-top: 20px;
         }
         video {
-            width: 80%;
-            max-width: 600px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background-color: #000;
         }
         .controls {
             margin-top: 10px;
+            display: flex;
+            justify-content: center;
         }
         button {
-            margin: 0 5px;
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
         }
     </style>
 </head>
 <body>
-    <h1>本地视频播放器</h1>
+    <h1>Local Video Player</h1>
     <input type="file" id="fileInput" accept="video/*">
-    <video id="video" controls></video>
+    <div id="videoContainer">
+        <video id="video" controls></video>
+    </div>
     <div class="controls">
-        <button onclick="stepBackward()">逐帧回退</button>
-        <button onclick="stepForward()">逐帧快进</button>
+        <button onclick="stepBackward()">Step Backward</button>
+        <button onclick="stepForward()">Step Forward</button>
     </div>
 
     <script>
@@ -45,12 +73,12 @@
         });
 
         function stepForward() {
-            // 每次快进0.033秒（约30帧/秒）
+            // Each step is 0.033 seconds (about 30 frames per second)
             video.currentTime += 0.033;
         }
 
         function stepBackward() {
-            // 每次回退0.033秒（约30帧/秒）
+            // Each step is 0.033 seconds (about 30 frames per second)
             video.currentTime -= 0.033;
         }
     </script>
