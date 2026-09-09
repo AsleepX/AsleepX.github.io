@@ -121,6 +121,28 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 @keyframes cat-whisker-sway { 0%, 100% { transform: rotate(-2deg); } 45% { transform: rotate(3deg); } 70% { transform: rotate(0deg); } }
 .portrait.is-paused .portrait-cat-ear, .portrait.is-paused .cat-whisker { animation-play-state: paused; }
 .cat.is-fusing { pointer-events: none; }
+.cat-ear-button { position: absolute; top: 2%; width: 20%; height: 21%; min-width: 30px; min-height: 30px; border: 0; padding: 0; background: transparent; cursor: pointer; z-index: 2; }
+.cat-ear-button-left { left: 25%; }
+.cat-ear-button-right { left: 58%; }
+.cat-ear-button:focus-visible { outline: 1px dashed var(--muted); outline-offset: 3px; border-radius: 50%; }
+.photo-gallery { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: center; }
+.photo-link { display: block; cursor: zoom-in; }
+.photo-link img { display: block; width: 100%; height: auto; }
+.photo-lightbox { position: fixed; inset: 0; width: 100%; height: 100%; max-width: none; max-height: none; margin: 0; border: 0; padding: 64px 40px 76px; color: #fff; background: #141414; }
+.photo-lightbox[open] { display: grid; place-items: center; }
+.photo-lightbox::backdrop { background: #141414; }
+.photo-full { display: block; width: 100%; height: 100%; min-height: 0; object-fit: contain; }
+.photo-lightbox button { background: transparent; border: 0; color: inherit; font: 14px var(--sans); cursor: pointer; padding: 12px; }
+.photo-lightbox button:focus-visible { outline: 1px solid #fff; outline-offset: 3px; }
+.photo-close { position: absolute; top: 14px; right: 24px; }
+.photo-controls { position: absolute; bottom: 18px; left: 28px; right: 28px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+.photo-counter { color: #bcbcbc; font-size: 13px; font-variant-numeric: tabular-nums; }
+@media (max-width: 680px) {
+  .photo-gallery { grid-template-columns: 1fr; gap: 22px; margin-top: 8px; }
+  .photo-lightbox { padding: 60px 12px 76px; }
+  .photo-close { right: 8px; }
+  .photo-controls { left: 4px; right: 4px; }
+}
 @media (prefers-reduced-motion: reduce) {
   .portrait-cat { transition: none; }
   .portrait.is-cat .portrait-cat-ear, .portrait.is-cat .cat-whisker { animation: none; }

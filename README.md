@@ -23,8 +23,13 @@ contact adjustments are applied to that gait when walking over text or the avata
 Hold or release the cat over the portrait's face for four continuous seconds to
 fuse them. Moving within the face keeps the timer going; leaving resets it. The
 cat fades away and the portrait gains independently twitching ears and curved
-whiskers that sway gently from their roots. Refresh the page to restore the cat.
+whiskers that sway gently from their roots. Click either ear to release the cat;
+it jumps out beside the portrait and returns to its divider to sleep.
 Reduced motion keeps the ears and whiskers still.
+
+Three photographs appear uncropped in a responsive gallery. Select a photograph
+to open the larger version; use the arrow buttons or arrow keys to browse and
+Escape to close. Smaller preview files keep the homepage light.
 
 Run `node --test tests/*.test.mjs` to check landing, route planning, and fusion.
 

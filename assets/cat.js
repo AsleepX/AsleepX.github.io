@@ -182,6 +182,8 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
   let fusionFrame = 0;
   let faceWaiting = false;
   let fused = false;
+  let fusionAnimation = null;
+  const earButtons = [...document.querySelectorAll('.cat-ear-button')];
   const isOverFace = () => portrait && overFace(cat.getBoundingClientRect(), portrait.getBoundingClientRect());
   function stopFusionWatch() {
     cancelAnimationFrame(fusionFrame);
@@ -206,13 +208,48 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
     cat.classList.remove('is-held', 'is-looking', 'is-running', 'is-jumping');
     cat.classList.add('is-fusing');
     portrait.classList.add('is-cat');
+    earButtons.forEach(button => { button.hidden = false; });
     portrait.setAttribute('aria-label', 'Zixuan Zhao with animated cat ears and whiskers');
     const transform = cat.style.transform;
-    const dissolve = cat.animate([
+    const dissolve = fusionAnimation = cat.animate([
       {opacity:1, transform}, {opacity:0, transform:`${transform} scale(.15)`},
     ], {duration:reducedMotion.matches ? 0 : 550, easing:'ease-in', fill:'forwards'});
-    dissolve.onfinish = () => { cat.hidden = true; dissolve.cancel(); };
+    dissolve.onfinish = () => { if (fused) cat.hidden = true; dissolve.cancel(); fusionAnimation = null; };
   }
+  async function releaseFromPortrait(side, keyboard) {
+    if (!fused) return;
+    fused = false;
+    fusionAnimation?.cancel();
+    fusionAnimation = null;
+    earButtons.forEach(button => { button.hidden = true; });
+    portrait.classList.remove('is-cat');
+    portrait.setAttribute('aria-label', 'Black-and-white illustrated avatar of Zixuan Zhao');
+    cancelJourney();
+    const token = journey;
+    busy = true;
+    cat.hidden = false;
+    cat.classList.remove('is-fusing', 'is-grounded');
+    cat.classList.add('is-jumping');
+    rig.removeAttribute('transform');
+    pose(1);
+    const r = portrait.getBoundingClientRect();
+    const direction = side === 'left' ? -1 : 1;
+    cat.style.setProperty('--cat-direction', String(direction));
+    const start = {x:r.left + scrollX + r.width * (side === 'left' ? .3 : .7), y:r.top + scrollY + r.height * .25};
+    const end = {x:clamp(start.x + direction * 76, 40, document.documentElement.clientWidth - 40), y:start.y + r.height * .3};
+    moveWorld(start.x, start.y);
+    if (keyboard) cat.focus({preventScroll:true});
+    if (!await frameSequence(reducedMotion.matches ? 100 : 650, t => {
+      moveWorld(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t - 80 * t * (1 - t));
+      rig.setAttribute('transform', `translate(32 25) scale(${.45 + .55 * phase(t, 0, .6)}) translate(-32 -25)`);
+    }, token)) return;
+    rig.removeAttribute('transform');
+    cat.classList.remove('is-jumping');
+    landAndReturn();
+  }
+  earButtons.forEach(button => button.addEventListener('click', event => {
+    releaseFromPortrait(button.dataset.side, event.detail === 0);
+  }));
   function watchFace() {
     if (fusionFrame || fused) return;
     function tick(now) {

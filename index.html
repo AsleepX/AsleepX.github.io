@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#ffffff">
   <title>Zixuan Zhao — AsleepX</title>
   <link rel="icon" href="assets/me.png" type="image/png">
-  <link rel="stylesheet" href="assets/style.css?v=fd666e61">
+  <link rel="stylesheet" href="assets/style.css?v=c0b73e7d">
   <script src="assets/portrait.js?v=2d704656" defer></script>
-  <script type="module" src="assets/cat.js?v=4fb26ce4" defer></script>
+  <script type="module" src="assets/cat.js?v=efd59cb9" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -30,7 +30,7 @@
             School of Computer Science and Artificial Intelligence<br>
             Shanghai University of Finance and Economics</p>
         </div>
-        <div class="portrait" role="img" aria-label="Black-and-white illustrated avatar of Zixuan Zhao">
+        <div class="portrait" role="group" aria-label="Black-and-white illustrated avatar of Zixuan Zhao">
           <img class="portrait-fallback" src="assets/me.png" alt="" width="1254" height="1254" fetchpriority="high">
           <svg class="portrait-live" viewBox="0 0 1254 1254" aria-hidden="true" focusable="false">
             <defs>
@@ -80,6 +80,8 @@
               <path class="cat-whisker cat-whisker-right" style="transform-origin:780px 711px" d="M780 711Q845 715 902 758"/>
             </g>
           </svg>
+          <button class="cat-ear-button cat-ear-button-left" data-side="left" type="button" aria-label="Release the cat from the left ear" title="Release the cat" hidden></button>
+          <button class="cat-ear-button cat-ear-button-right" data-side="right" type="button" aria-label="Release the cat from the right ear" title="Release the cat" hidden></button>
         </div>
       </section>
       <div class="cat-track">
@@ -111,6 +113,17 @@
           <p class="statement">Seeing the everyday through a 35mm lens.</p>
           <p class="detail">I enjoy photography. 35mm is my most-used focal length.</p>
         </div>
+        <div class="photo-gallery" aria-label="Selected photographs">
+          <a class="photo-link" href="assets/photos/quiet-room.jpg" aria-label="Enlarge photograph: a quiet room in green light">
+            <img src="assets/photos/quiet-room-preview.jpg" width="720" height="480" loading="lazy" decoding="async" alt="Green light in a quiet room, with an open refrigerator, a hanging lamp and a wooden table.">
+          </a>
+          <a class="photo-link" href="assets/photos/passing-cat.jpg" aria-label="Enlarge photograph: a cat passing a shop">
+            <img src="assets/photos/passing-cat-preview.jpg" width="720" height="540" loading="lazy" decoding="async" alt="A calico cat walks past a pink shopfront and a green metal chair.">
+          </a>
+          <a class="photo-link" href="assets/photos/open-sky.jpg" aria-label="Enlarge photograph: trees beneath an open sky">
+            <img src="assets/photos/open-sky-preview.jpg" width="720" height="480" loading="lazy" decoding="async" alt="A sunlit lawn and trees between buildings beneath a blue sky with large clouds.">
+          </a>
+        </div>
       </section>
       <section class="info-row contact" id="contact" aria-labelledby="contact-heading">
         <h2 id="contact-heading">Contact</h2>
@@ -123,5 +136,15 @@
     </main>
     <footer><span>Zixuan Zhao</span><span>Shanghai, China</span></footer>
   </div>
+  <dialog class="photo-lightbox" aria-label="Photograph viewer">
+    <button class="photo-close" type="button" aria-label="Close photograph">Close ×</button>
+    <img class="photo-full" alt="">
+    <div class="photo-controls">
+      <button class="photo-previous" type="button" aria-label="Previous photograph">← Previous</button>
+      <span class="photo-counter" aria-live="polite"></span>
+      <button class="photo-next" type="button" aria-label="Next photograph">Next →</button>
+    </div>
+  </dialog>
+  <script src="assets/gallery.js?v=1270728d" defer></script>
 </body>
 </html>
