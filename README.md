@@ -36,6 +36,10 @@ tree, roof, and ground surfaces. These one-way platforms join the return route.
 Their normalized coordinates follow responsive image sizing. Scene maps live in
 `assets/cat-photo-world.js`; replacing a photograph requires tracing its new objects.
 While holding the cat, move toward the viewport edge to scroll to the gallery.
+Opening a photograph also enlarges any cat inside it at the same scale. The
+lightbox mirrors the live rig and ongoing route, including walking and jumping;
+the cat leaves the frame naturally as it returns home. Closing the viewer does
+not restart or duplicate the cat's journey.
 
 Run `node --test tests/*.test.mjs` to check landing, route planning, and fusion.
 
