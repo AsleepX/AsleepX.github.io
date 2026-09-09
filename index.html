@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#ffffff">
   <title>Zixuan Zhao — AsleepX</title>
   <link rel="icon" href="assets/me.png" type="image/png">
-  <link rel="stylesheet" href="assets/style.css?v=7d5ce511">
+  <link rel="stylesheet" href="assets/style.css?v=2b5e75de">
   <script src="assets/portrait.js" defer></script>
-  <script src="assets/cat.js?v=eb4de9b0" defer></script>
+  <script type="module" src="assets/cat.js?v=d31b28ad" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -67,8 +67,9 @@
         </div>
       </section>
       <div class="cat-track">
-        <button class="cat" type="button" aria-label="Wake the sleeping cat" title="Wake the sleeping cat" hidden>
+        <button class="cat" type="button" aria-label="Drag the cat, or click to wake it" title="Drag me, or click to wake me" hidden>
           <svg viewBox="0 0 64 44" aria-hidden="true" focusable="false">
+            <g class="cat-rig">
             <g class="cat-legs" fill="none" stroke="#000" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
               <path class="cat-leg cat-leg-back cat-leg-b" d="M20 28Q24 33 21 39"/>
               <path class="cat-leg cat-leg-front cat-leg-a" d="M43 28Q42 34 44 39"/>
@@ -79,6 +80,7 @@
             <g class="cat-torso" fill="#000">
               <path class="cat-body" d="M11 31C10 23 16 18 25 18C33 18 36 22 43 23C48 24 50 29 46 34C42 40 16 40 11 36Q9 34 11 31Z"/>
               <path class="cat-head" transform="translate(0 5)" d="M40 23L40 14Q40 11 42 12L46 16Q48 16 50 17L54 14Q56 13 56 16L56 23Q58 25 55 27C51 31 43 30 40 26Z"/>
+            </g>
             </g>
           </svg>
         </button>

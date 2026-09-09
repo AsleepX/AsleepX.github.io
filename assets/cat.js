@@ -1,3 +1,5 @@
+import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './cat-world.js?v=7ad75aa2';
+
 (() => {
   const cat = document.querySelector('.cat');
   const track = document.querySelector('.cat-track');
@@ -109,6 +111,7 @@
     running = null;
     busy = false;
     cat.classList.remove('is-waking', 'is-running', 'is-settling');
+    legPaths.forEach(leg => leg.style.removeProperty('transform'));
     pose(0);
   };
 
@@ -116,7 +119,7 @@
   cat.hidden = false;
   place(limit() * .72);
   cat.addEventListener('click', event => {
-    if (busy || limit() === 0) return;
+    if (suppressClick || busy || limit() === 0) return;
     const bounds = track.getBoundingClientRect();
     // Keyboard activation uses the cat's position instead of synthetic (0, 0).
     const cursor = event.detail === 0
@@ -153,7 +156,233 @@
       };
     });
   });
-  window.addEventListener('resize', () => { sleep(); place(position); }, { passive: true });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) sleep(); });
-  reducedMotion.addEventListener('change', sleep);
+  // Drag/drop and platform navigation share the same rig and cancellation scope.
+  const rig = cat.querySelector('.cat-rig');
+  const svg = cat.querySelector('svg');
+  let drag = null;
+  let roaming = false;
+  let suppressClick = false;
+  let journey = 0;
+  let journeyFrame = 0;
+  let holdTimer;
+  let world = { x: 0, y: 0 }; // center of the paws in document coordinates
+  const footOffset = 39;
+  const halfWidth = 28;
+  const homePoint = () => {
+    const r = track.getBoundingClientRect();
+    return { x: r.left + scrollX + limit() * .72 + halfWidth, y: r.top + scrollY };
+  };
+  function moveWorld(x, y) {
+    world = { x, y };
+    cat.style.transform = `translate(${x - halfWidth}px, ${y - footOffset}px)`;
+  }
+  function cancelJourney() {
+    journey++;
+    cancelAnimationFrame(journeyFrame);
+    journeyFrame = 0;
+    sleep();
+  }
+  function portal() {
+    if (roaming) return;
+    const r = cat.getBoundingClientRect();
+    const current = { x: r.left + scrollX + halfWidth, y: r.top + scrollY + footOffset };
+    document.body.append(cat);
+    cat.classList.add('is-roaming');
+    roaming = true;
+    moveWorld(current.x, current.y);
+  }
+  function restoreHome() {
+    if (drag) {
+      const pointerId = drag.pointerId;
+      drag = null;
+      if (cat.hasPointerCapture(pointerId)) cat.releasePointerCapture(pointerId);
+    }
+    cancelJourney();
+    document.documentElement.classList.remove('cat-dragging');
+    clearTimeout(holdTimer);
+    rig.removeAttribute('transform');
+    cat.classList.remove('is-held', 'is-looking', 'is-jumping', 'is-climbing');
+    cat.classList.remove('is-roaming');
+    cat.removeAttribute('data-grab');
+    cat.style.removeProperty('transform');
+    track.append(cat);
+    roaming = false;
+    place(limit() * .72);
+    pose(0);
+  }
+  function frameSequence(duration, render, token) {
+    return new Promise(resolve => {
+      const start = performance.now();
+      function tick(now) {
+        if (token !== journey) { resolve(false); return; }
+        const t = Math.min(1, (now - start) / duration);
+        render(t);
+        if (t < 1) journeyFrame = requestAnimationFrame(tick);
+        else { journeyFrame = 0; resolve(true); }
+      }
+      journeyFrame = requestAnimationFrame(tick);
+    });
+  }
+  function heldPose(part) {
+    pose(1);
+    body.removeAttribute('transform');
+    head.removeAttribute('transform');
+    tail.removeAttribute('transform');
+    // Each grasp uses the same silhouette, with different joint and gravity poses.
+    const rotation = part === 'head' ? -68 : part === 'tail' ? 72 : 8;
+    const pivot = part === 'head' ? [48, 21] : part === 'tail' ? [8, 16] : [29, 23];
+    rig.setAttribute('transform', `rotate(${rotation} ${pivot.join(' ')})`);
+    if (part === 'body') {
+      head.setAttribute('transform', 'rotate(18 41 23) translate(0 2)');
+      tail.setAttribute('d', 'M13 26C7 27 7 33 9 38C10 40 12 39 12 37');
+    }
+    // Free paws hang outward from their fixed shoulder and hip joints.
+    legPaths.forEach((leg, i) => {
+      const front = i % 2 === 1;
+      const x = front ? 43 : 20, y = front ? 25 : 26;
+      const dx = part === 'head' ? -11 : part === 'tail' ? 11 : 0;
+      leg.setAttribute('d', `M${x} ${y}Q${x + dx * .5} ${y + 7} ${x + dx + (i < 2 ? -2 : 2)} ${y + 15}`);
+    });
+    return pivot;
+  }
+  function beginDrag(event) {
+    if (!drag || drag.active) return;
+    const local = drag.local;
+    // Tail is the rear of the facing silhouette; head is the opposite end.
+    const part = local.x < 17 ? 'tail' : local.x > 39 ? 'head' : 'body';
+    portal();
+    cat.setPointerCapture(drag.pointerId);
+    cancelJourney();
+    busy = true;
+    drag.active = true;
+    drag.part = part;
+    suppressClick = true;
+    cat.classList.remove('is-looking', 'is-jumping', 'is-climbing');
+    cat.classList.add('is-held');
+    cat.dataset.grab = part;
+    const pivot = heldPose(part);
+    // Keep the actual grasp point directly under the pointer, including mirroring.
+    const facing = getComputedStyle(cat).getPropertyValue('--cat-direction').trim() === '-1' ? -1 : 1;
+    drag.offset = { x: (facing < 0 ? 64 - pivot[0] : pivot[0]) * .875, y: pivot[1] * .875 + 2.75 };
+    moveWorld(event.pageX - drag.offset.x + halfWidth, event.pageY - drag.offset.y + footOffset);
+  }
+  cat.addEventListener('pointerdown', event => {
+    if (event.button !== 0 || drag) return;
+    // Read the unrotated image coordinates before taking pointer capture.
+    const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM().inverse());
+    drag = { pointerId: event.pointerId, local: point, startX: event.pageX, startY: event.pageY, active: false };
+    cat.setPointerCapture(event.pointerId);
+    document.documentElement.classList.add('cat-dragging');
+    event.preventDefault();
+    holdTimer = setTimeout(() => beginDrag(event), 140);
+  });
+  window.addEventListener('pointermove', event => {
+    if (!drag || event.pointerId !== drag.pointerId) return;
+    if (!drag.active && Math.hypot(event.pageX - drag.startX, event.pageY - drag.startY) > 3) beginDrag(event);
+    if (!drag.active) return;
+    event.preventDefault();
+    const x = clamp(event.pageX - drag.offset.x + halfWidth, 40, document.documentElement.clientWidth - 40);
+    const y = Math.max(footOffset, event.pageY - drag.offset.y + footOffset);
+    moveWorld(x, y);
+  });
+  async function landAndReturn() {
+    const token = journey;
+    pose(1);
+    rig.removeAttribute('transform');
+    cat.classList.remove('is-held');
+    cat.removeAttribute('data-grab');
+    let platforms = collectPlatforms(track);
+    let surface = firstLanding(platforms, world.x, world.y);
+    if (!surface) surface = platforms.find(p => p.id === 'floor');
+    const start = { ...world };
+    const distance = Math.max(0, surface.y - start.y);
+    cat.classList.add('is-jumping');
+    if (!await frameSequence(reducedMotion.matches ? 100 : Math.max(160, Math.sqrt(2 * distance / 1100) * 1000), t => {
+      moveWorld(start.x, start.y + distance * t * t);
+    }, token)) return;
+    cat.classList.remove('is-jumping');
+    moveWorld(start.x, surface.y);
+    cat.classList.add('is-looking');
+    if (!await frameSequence(reducedMotion.matches ? 100 : 1250, t => {
+      const angle = Math.sin(t * Math.PI * 3) * 11;
+      head.setAttribute('transform', `rotate(${angle} 45 25)`);
+    }, token)) return;
+    cat.classList.remove('is-looking');
+    pose(1);
+    platforms = collectPlatforms(track);
+    const home = homePoint();
+    const route = findRoute(platforms, { ...world, platform: surface.id }, home.x);
+    let from = { ...world, platform: surface.id };
+    for (const to of route) {
+      if (token !== journey) return;
+      const walking = from.platform === to.platform;
+      cat.style.setProperty('--cat-direction', to.x < from.x ? '-1' : '1');
+      cat.classList.toggle('is-running', walking);
+      cat.classList.toggle('is-jumping', !walking);
+      const climb = !walking && to.y < from.y - 42;
+      const gripDepth = climb ? 16 : 0;
+      const length = Math.hypot(to.x - from.x, to.y - from.y);
+      const duration = reducedMotion.matches ? 100 : walking ? Math.max(160, length / .09) : Math.max(520, length / .24);
+      if (!await frameSequence(duration, t => {
+        const rise = walking ? 0 : 4 * jumpHeight(from, to) * t * (1 - t);
+        moveWorld(from.x + (to.x - from.x) * t, from.y + (to.y + gripDepth - from.y) * t - rise);
+        if (!walking) {
+          const tuck = Math.sin(t * Math.PI) * 13;
+          legPaths.forEach((leg, i) => leg.style.transform = `rotate(${i % 2 ? tuck : -tuck}deg)`);
+        } else {
+          const bob = `translate(0 ${(-.55 * (1 - Math.cos(t * duration / 620 * Math.PI * 2))).toFixed(3)})`;
+          body.setAttribute('transform', bob); head.setAttribute('transform', bob); tail.setAttribute('transform', bob);
+        }
+      }, token)) return;
+      legPaths.forEach(leg => leg.style.removeProperty('transform'));
+      pose(1);
+      if (climb) {
+        cat.classList.remove('is-jumping');
+        cat.classList.add('is-climbing');
+        // Forepaws stay on the ledge while shoulders lift and hind legs follow.
+        if (!await frameSequence(reducedMotion.matches ? 100 : 780, t => {
+          const pull = phase(t, .15, 1);
+          const remaining = gripDepth * (1 - pull);
+          moveWorld(to.x, to.y + remaining);
+          const ledge = footOffset - remaining;
+          legPaths.forEach((leg, i) => {
+            leg.setAttribute('d', i % 2
+              ? `M43 25Q48 ${ledge - 3} 49 ${ledge}`
+              : `M20 26Q15 31 ${18 + pull * 2} ${33 + pull * 6}`);
+          });
+          head.setAttribute('transform', `rotate(${-8 * (1 - pull)} 43 25)`);
+        }, token)) return;
+        cat.classList.remove('is-climbing');
+        pose(1);
+      }
+      if (!walking && !await frameSequence(reducedMotion.matches ? 50 : 260, () => {}, token)) return;
+      from = to;
+    }
+    cat.classList.remove('is-running', 'is-jumping');
+    if (!await frameSequence(reducedMotion.matches ? 100 : 1100, t => pose(1 - t, true), token)) return;
+    restoreHome();
+  }
+  function release(event, canceled = false) {
+    if (!drag || (event && event.pointerId !== drag.pointerId)) return;
+    clearTimeout(holdTimer);
+    document.documentElement.classList.remove('cat-dragging');
+    const active = drag.active;
+    if (cat.hasPointerCapture(drag.pointerId)) cat.releasePointerCapture(drag.pointerId);
+    drag = null;
+    if (canceled) { if (active) restoreHome(); }
+    else if (active) landAndReturn();
+    // The click immediately following pointerup must not wake a just-dropped cat.
+    setTimeout(() => { suppressClick = false; }, 0);
+  }
+  window.addEventListener('pointerup', event => release(event));
+  window.addEventListener('pointercancel', event => release(event, true));
+  cat.addEventListener('keydown', event => { if (event.key === 'Escape' && roaming) { release(null, true); restoreHome(); } });
+  window.addEventListener('resize', () => {
+    if (roaming) restoreHome(); else { sleep(); place(position); }
+  }, { passive: true });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { if (roaming) restoreHome(); else sleep(); }
+  });
+  window.addEventListener('blur', () => { if (drag) restoreHome(); });
+  reducedMotion.addEventListener('change', () => { if (roaming) restoreHome(); else sleep(); });
 })();

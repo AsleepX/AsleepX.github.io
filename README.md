@@ -8,7 +8,13 @@ its eyes follow the pointer and it blinks naturally. After four seconds without
 pointer movement, its tongue stays out until the pointer moves again. Animation pauses offscreen and in hidden tabs. Reduced-motion
 preferences and disabled JavaScript retain the original static portrait.
 A small black cat sleeps on the introduction divider. Clicking or keyboard-activating
-it makes it run away along the line and settle back to sleep.
+it makes it run away along the line and settle back to sleep. Hold and drag its
+head, body, or tail to pick it up in different poses. On release, it falls onto
+text, dividers, or the avatar, looks around, and follows a shortest walk/jump
+route over page platforms back to its original spot. Short hops, ledge pull-ups,
+and brief pauses make the return journey readable. Escape returns it home.
+
+Run `node --test tests/cat-world.test.mjs` to check landing and route planning.
 
 ## Local preview
 

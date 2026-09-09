@@ -95,3 +95,11 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
   .tongue { transition: none; }
   .cat.is-running .cat-leg { animation: none; }
 }
+
+.cat { touch-action: none; user-select: none; -webkit-user-select: none; }
+.cat.is-roaming { position: absolute; left: 0; top: 0; bottom: auto; z-index: 20; }
+.cat.is-held { cursor: grabbing; }
+.cat.is-jumping .cat-leg { animation: none; }
+.cat-rig { transform-box: view-box; }
+
+.cat-dragging, .cat-dragging * { user-select: none !important; -webkit-user-select: none !important; }
