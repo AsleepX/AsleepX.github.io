@@ -46,6 +46,7 @@
     head.setAttribute('transform', `translate(0 ${5 * (1 - phase(value, .18, .75))})`);
     const lift = phase(value, .3, .95);
     const flex = Math.sin(Math.PI * phase(value, .15, 1));
+    body.removeAttribute('transform');
     body.setAttribute('d', shapeBody(morph(bodySleep, bodyStand, lift),
       flex * (settling ? -.06 : .1), flex * .15));
     // Each root follows its shoulder/hip. Bent knees unfold behind the torso;
@@ -82,6 +83,8 @@
       const elapsed = now - start;
       const envelope = phase(elapsed, 0, 200) * (1 - phase(elapsed, duration - 200, duration));
       const stride = elapsed / 620 * Math.PI * 2;
+      // A small whole-body shift remains visible at the 56px display size.
+      body.setAttribute('transform', `translate(0 ${(-.55 * (1 - Math.cos(stride)) * envelope).toFixed(3)})`);
       body.setAttribute('d', shapeBody(bodyStand,
         Math.sin(stride) * .08 * envelope, Math.sin(stride) * .15 * envelope, 0));
       bodyFrame = requestAnimationFrame(step);
