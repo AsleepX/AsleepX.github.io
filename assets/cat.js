@@ -88,6 +88,7 @@
       const rise = `translate(0 ${(-.55 * (1 - Math.cos(stride)) * envelope).toFixed(3)})`;
       body.setAttribute('transform', rise);
       tail.setAttribute('transform', rise);
+      head.setAttribute('transform', rise);
       body.setAttribute('d', shapeBody(bodyStand,
         Math.sin(stride) * .08 * envelope, Math.sin(stride) * .15 * envelope, 0));
       bodyFrame = requestAnimationFrame(step);
