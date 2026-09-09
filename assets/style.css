@@ -85,9 +85,9 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 .cat svg { display: block; width: 56px; height: 44px; overflow: visible; transform: scaleX(var(--cat-direction, 1)); }
 .cat:focus-visible { outline: 1px dashed #606570; outline-offset: 3px; border-radius: 8px; }
 /* Grounded feet and continuously reshaped body/tail share a single rig. */
-.cat-legs { transform-origin: 32px 39px; transform: scaleY(.12); }
-.cat-leg-back { transform-origin: 20px 28px; }
-.cat-leg-front { transform-origin: 43px 28px; }
+.cat-legs { visibility: hidden; }
+.cat-leg-back { transform-origin: 20px 26px; }
+.cat-leg-front { transform-origin: 43px 25px; }
 .cat.is-running .cat-leg { animation: cat-stride 620ms ease-in-out infinite; }
 .cat.is-running .cat-leg-b { animation-delay: -310ms; }
 @keyframes cat-stride { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }

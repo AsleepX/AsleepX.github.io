@@ -11,6 +11,7 @@
   const head = cat.querySelector('.cat-head');
   const tail = cat.querySelector('.cat-tail');
   const legs = cat.querySelector('.cat-legs');
+  const legPaths = [...legs.querySelectorAll('.cat-leg')];
   const bodySleep = 'M11 31C10 23 16 18 25 18C33 18 36 22 43 23C48 24 50 29 46 34C42 40 16 40 11 36Q9 34 11 31Z';
   const bodyStand = 'M11 26C10 18 16 13 25 13C33 13 36 17 43 18C48 19 50 24 46 29C40 35 18 37 13 31Q11 29 11 26Z';
   const tailSleep = 'M13 31C5 34 10 40 22 39C30 39 39 39 44 36';
@@ -29,8 +30,24 @@
     // Tail unfurls first; head rises, then the torso and grounded legs extend.
     tail.setAttribute('d', morph(tailSleep, tailStand, phase(value, 0, .55)));
     head.setAttribute('transform', `translate(0 ${5 * (1 - phase(value, .18, .75))})`);
-    body.setAttribute('d', morph(bodySleep, bodyStand, phase(value, .3, .95)));
-    legs.style.transform = `scaleY(${.12 + .88 * phase(value, .35, 1)})`;
+    const lift = phase(value, .3, .95);
+    body.setAttribute('d', morph(bodySleep, bodyStand, lift));
+    // Each root follows its shoulder/hip. Bent knees unfold behind the torso;
+    // feet emerge from the belly instead of scaling upward from the ground.
+    const extend = phase(value, .32, 1);
+    const drop = 5 * (1 - lift);
+    const mix = (a, b) => a + (b - a) * extend;
+    const joints = [
+      [20, 26, 24, 34, 24, 33, 25, 35, 21, 39],
+      [43, 25, 40, 32, 42, 33, 40, 33, 44, 39],
+      [20, 26, 24, 34, 16, 33, 25, 35, 18, 39],
+      [43, 25, 40, 32, 46, 33, 40, 33, 44, 39],
+    ];
+    legPaths.forEach((leg, i) => {
+      const [x, y, kx0, ky0, kx1, ky1, fx0, fy0, fx1, fy1] = joints[i];
+      leg.setAttribute('d', `M${x} ${y + drop}Q${mix(kx0, kx1)} ${mix(ky0, ky1)} ${mix(fx0, fx1)} ${mix(fy0, fy1)}`);
+    });
+    legs.style.visibility = value === 0 ? 'hidden' : 'visible';
   }
   function changePose(from, to, duration, done) {
     const start = performance.now();
@@ -57,6 +74,7 @@
     pose(0);
   };
 
+  pose(0);
   cat.hidden = false;
   place(limit() * .72);
   cat.addEventListener('click', event => {
