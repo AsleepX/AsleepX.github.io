@@ -6,6 +6,7 @@
   let position = 0;
   let running = null;
   let poseFrame = 0;
+  let bodyFrame = 0;
   let busy = false;
   const body = cat.querySelector('.cat-body');
   const head = cat.querySelector('.cat-head');
@@ -26,12 +27,27 @@
     const t = Math.max(0, Math.min(1, (value - start) / (end - start)));
     return t * t * (3 - 2 * t);
   }
-  function pose(value) {
+  function shapeBody(path, arch = 0, stretch = 0, sway = 0) {
+    // Flex the back and belly while keeping the neck and limb junctions fixed.
+    const offsets = {
+      3: -arch * .35, 4: -stretch, 5: -arch * .8 + sway,
+      6: -stretch * .4, 7: -arch + sway * .5,
+      8: stretch * .4, 9: -arch * .8 - sway * .5,
+      10: stretch, 11: -arch * .35 - sway,
+      21: arch * .18, 23: arch * .18,
+    };
+    let index = 0;
+    return path.replace(/-?\d+(?:\.\d+)?/g, value =>
+      (Number(value) + (offsets[index++] || 0)).toFixed(3));
+  }
+  function pose(value, settling = false) {
     // Tail unfurls first; head rises, then the torso and grounded legs extend.
     tail.setAttribute('d', morph(tailSleep, tailStand, phase(value, 0, .55)));
     head.setAttribute('transform', `translate(0 ${5 * (1 - phase(value, .18, .75))})`);
     const lift = phase(value, .3, .95);
-    body.setAttribute('d', morph(bodySleep, bodyStand, lift));
+    const flex = Math.sin(Math.PI * phase(value, .15, 1));
+    body.setAttribute('d', shapeBody(morph(bodySleep, bodyStand, lift),
+      0, flex * .15));
     // Each root follows its shoulder/hip. Bent knees unfold behind the torso;
     // feet emerge from the belly instead of scaling upward from the ground.
     const extend = phase(value, .32, 1);
@@ -53,11 +69,24 @@
     const start = performance.now();
     function step(now) {
       const progress = Math.min(1, (now - start) / duration);
-      pose(from + (to - from) * progress);
+      pose(from + (to - from) * progress, to < from);
       if (progress < 1) poseFrame = requestAnimationFrame(step);
       else { poseFrame = 0; done(); }
     }
     poseFrame = requestAnimationFrame(step);
+  }
+  function walkBody(duration) {
+    const start = performance.now();
+    function step(now) {
+      if (!running) return;
+      const elapsed = now - start;
+      const envelope = phase(elapsed, 0, 200) * (1 - phase(elapsed, duration - 200, duration));
+      const stride = elapsed / 620 * Math.PI * 2;
+      body.setAttribute('d', shapeBody(bodyStand,
+        0, Math.sin(stride) * .15 * envelope, 0));
+      bodyFrame = requestAnimationFrame(step);
+    }
+    bodyFrame = requestAnimationFrame(step);
   }
   const limit = () => Math.max(0, track.clientWidth - cat.offsetWidth);
   const place = x => {
@@ -66,6 +95,8 @@
   };
   const sleep = () => {
     cancelAnimationFrame(poseFrame);
+    cancelAnimationFrame(bodyFrame);
+    bodyFrame = 0;
     poseFrame = 0;
     if (running) running.cancel();
     running = null;
@@ -99,11 +130,15 @@
       cat.classList.remove('is-waking');
       cat.classList.add('is-running');
       place(destination);
+      const duration = Math.max(1100, Math.abs(position - start) / .09);
       running = cat.animate([
         { transform: `translateX(${start}px)` },
         { transform: `translateX(${position}px)` },
-      ], { duration: Math.max(1100, Math.abs(position - start) / .09), easing: 'cubic-bezier(.25,.1,.65,1)' });
+      ], { duration, easing: 'cubic-bezier(.25,.1,.65,1)' });
+      walkBody(duration);
       running.onfinish = () => {
+        cancelAnimationFrame(bodyFrame);
+        bodyFrame = 0;
         running = null;
         cat.classList.remove('is-running');
         cat.classList.add('is-settling');
