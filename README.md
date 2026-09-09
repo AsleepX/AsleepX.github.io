@@ -4,9 +4,11 @@ A minimal English academic homepage, built with semantic HTML and responsive CSS
 No external fonts, dependencies, or build step.
 
 The avatar uses a small vanilla JavaScript animation and SVG facial layers:
-its eyes follow the pointer, it blinks naturally, and occasionally sticks out
-its tongue. Animation pauses offscreen and in hidden tabs. Reduced-motion
+its eyes follow the pointer and it blinks naturally. After four seconds without
+pointer movement, its tongue stays out until the pointer moves again. Animation pauses offscreen and in hidden tabs. Reduced-motion
 preferences and disabled JavaScript retain the original static portrait.
+A small black cat sleeps on the introduction divider. Clicking or keyboard-activating
+it makes it run away along the line and settle back to sleep.
 
 ## Local preview
 

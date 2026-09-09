@@ -4,6 +4,7 @@
 
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const timers = new Set();
+  let idleTimer;
   let frame = 0;
   let pointer = null;
   let current = { x: 0, y: 0 };
@@ -28,9 +29,14 @@
     later(blink, 2600 + Math.random() * 3800);
   }
 
-  function cheeky() {
-    express('is-cheeky', 1150);
-    later(cheeky, 10000 + Math.random() * 12000);
+  function restartIdle() {
+    clearTimeout(idleTimer);
+    portrait.classList.remove('is-cheeky');
+    if (active()) {
+      idleTimer = setTimeout(() => {
+        if (active()) portrait.classList.add('is-cheeky');
+      }, 4000);
+    }
   }
 
   function follow() {
@@ -64,6 +70,7 @@
   }
 
   function reset() {
+    clearTimeout(idleTimer);
     timers.forEach(clearTimeout);
     timers.clear();
     cancelAnimationFrame(frame);
@@ -73,7 +80,7 @@
     if (active()) {
       queueGaze();
       later(blink, 1800 + Math.random() * 2200);
-      later(cheeky, 6000 + Math.random() * 7000);
+      restartIdle();
     } else {
       current = { x: 0, y: 0 };
       portrait.style.removeProperty('--gaze-x');
@@ -83,7 +90,9 @@
 
   window.addEventListener('pointermove', event => {
     if (event.pointerType === 'touch') return;
+    if (pointer && pointer.x === event.clientX && pointer.y === event.clientY) return;
     pointer = { x: event.clientX, y: event.clientY };
+    restartIdle();
     queueGaze();
   }, { passive: true });
   document.documentElement.addEventListener('pointerleave', () => {
