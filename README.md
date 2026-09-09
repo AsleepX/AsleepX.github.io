@@ -11,8 +11,13 @@ A small black cat sleeps on the introduction divider. Clicking or keyboard-activ
 it makes it run away along the line and settle back to sleep. Hold and drag its
 head, body, or tail to pick it up in different poses. On release, it falls onto
 text, dividers, or the avatar, looks around, and follows a shortest walk/jump
-route over page platforms back to its original spot. Short hops, ledge pull-ups,
-and brief pauses make the return journey readable. Escape returns it home.
+route over page platforms back to its original spot. Horizontal hops are limited to 96px. Landings use a quick catch, slight knee
+bend, and immediate extension before continuing. Escape returns it home.
+Text platforms sample the top ink contour of each rendered glyph; avatar platforms
+follow the dark silhouette. Paws find separate contact points and the body follows
+the slope. Sampling reads current content, font metrics, and wrapping on each drop;
+text edits and font loading refresh an active journey automatically.
+On steep contours, unreachable paws release into a hanging pose instead of stretching.
 
 Run `node --test tests/cat-world.test.mjs` to check landing and route planning.
 

@@ -103,3 +103,5 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 .cat-rig { transform-box: view-box; }
 
 .cat-dragging, .cat-dragging * { user-select: none !important; -webkit-user-select: none !important; }
+
+.cat.is-grounded .cat-leg { animation: none; }

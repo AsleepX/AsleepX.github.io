@@ -1,4 +1,5 @@
-import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './cat-world.js?v=7ad75aa2';
+import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=5e4a87a9';
+import { groundedPaw } from './cat-pose.js?v=ba2c2122';
 
 (() => {
   const cat = document.querySelector('.cat');
@@ -176,6 +177,40 @@ import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './
     world = { x, y };
     cat.style.transform = `translate(${x - halfWidth}px, ${y - footOffset}px)`;
   }
+  function standOn(surface, x, { bend = 0, gait = null, offset = 0 } = {}) {
+    const facing = cat.style.getPropertyValue('--cat-direction') === '-1' ? -1 : 1;
+    const back = contactAt(surface, x - 10.5 * facing);
+    const front = contactAt(surface, x + 10.5 * facing);
+    const centerY = standingHeight(surface, x);
+    if (!Number.isFinite(centerY)) return '';
+    moveWorld(x, centerY + offset);
+    cat.classList.add('is-grounded');
+    const angle = back && front ? clamp(Math.atan2(front.y - back.y, 21) * 180 / Math.PI, -32, 32) : 0;
+    const bob = gait === null ? 0 : -.55 * (1 - Math.cos(gait));
+    const dy = bend + bob;
+    const transform = `translate(0 ${dy}) rotate(${angle} 32 25)`;
+    body.setAttribute('transform', transform);
+    head.setAttribute('transform', transform);
+    tail.setAttribute('transform', transform);
+    const radians = angle * Math.PI / 180;
+    legPaths.forEach((leg, i) => {
+      const isFront = i % 2 === 1;
+      const rootX = isFront ? 43 : 20, rootY = isFront ? 25 : 26;
+      const rx = 32 + (rootX - 32) * Math.cos(radians) - (rootY - 25) * Math.sin(radians);
+      const ry = 25 + (rootX - 32) * Math.sin(radians) + (rootY - 25) * Math.cos(radians) + dy;
+      const stride = gait === null ? 0 : Math.sin(gait + (i < 2 ? 0 : Math.PI)) * 2;
+      const desiredX = x + ((isFront ? 44 : 20) - 32 + stride) * .875 * facing;
+      const contact = contactAt(surface, desiredX) || (isFront ? front : back) || front || back;
+      if (!contact) return;
+      const footX = 32 + (contact.x - x) / (.875 * facing);
+      const swing = gait === null ? 0 : Math.max(0, Math.sin(gait + (i < 2 ? 0 : Math.PI))) * 1.4;
+      const footY = (contact.y - (world.y - footOffset) - 2.75) / .875 - 1.8 - swing;
+      const paw = groundedPaw({ x: rx, y: ry }, { x: footX, y: footY });
+      leg.style.removeProperty('transform');
+      leg.setAttribute('d', `M${rx} ${ry}Q${(rx + paw.x) / 2 + (isFront ? 1 : -2)} ${(ry + paw.y) / 2} ${paw.x} ${paw.y}`);
+    });
+    return transform;
+  }
   function cancelJourney() {
     journey++;
     cancelAnimationFrame(journeyFrame);
@@ -201,7 +236,7 @@ import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './
     document.documentElement.classList.remove('cat-dragging');
     clearTimeout(holdTimer);
     rig.removeAttribute('transform');
-    cat.classList.remove('is-held', 'is-looking', 'is-jumping', 'is-climbing');
+    cat.classList.remove('is-held', 'is-looking', 'is-jumping', 'is-climbing', 'is-landing', 'is-grounded');
     cat.classList.remove('is-roaming');
     cat.removeAttribute('data-grab');
     cat.style.removeProperty('transform');
@@ -257,7 +292,7 @@ import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './
     drag.active = true;
     drag.part = part;
     suppressClick = true;
-    cat.classList.remove('is-looking', 'is-jumping', 'is-climbing');
+    cat.classList.remove('is-looking', 'is-jumping', 'is-climbing', 'is-landing', 'is-grounded');
     cat.classList.add('is-held');
     cat.dataset.grab = part;
     const pivot = heldPose(part);
@@ -301,11 +336,12 @@ import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './
       moveWorld(start.x, start.y + distance * t * t);
     }, token)) return;
     cat.classList.remove('is-jumping');
-    moveWorld(start.x, surface.y);
+    standOn(surface, start.x);
     cat.classList.add('is-looking');
     if (!await frameSequence(reducedMotion.matches ? 100 : 1250, t => {
       const angle = Math.sin(t * Math.PI * 3) * 11;
-      head.setAttribute('transform', `rotate(${angle} 45 25)`);
+      const ground = standOn(surface, start.x);
+      head.setAttribute('transform', `${ground} rotate(${angle} 45 25)`);
     }, token)) return;
     cat.classList.remove('is-looking');
     pose(1);
@@ -316,11 +352,13 @@ import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './
     for (const to of route) {
       if (token !== journey) return;
       const walking = from.platform === to.platform;
+      const support = platforms.find(p => p.id === to.platform);
+      cat.classList.toggle('is-grounded', walking);
       cat.style.setProperty('--cat-direction', to.x < from.x ? '-1' : '1');
       cat.classList.toggle('is-running', walking);
       cat.classList.toggle('is-jumping', !walking);
       const climb = !walking && to.y < from.y - 42;
-      const gripDepth = climb ? 16 : 0;
+      const gripDepth = climb ? 6 : 0;
       const length = Math.hypot(to.x - from.x, to.y - from.y);
       const duration = reducedMotion.matches ? 100 : walking ? Math.max(160, length / .09) : Math.max(520, length / .24);
       if (!await frameSequence(duration, t => {
@@ -330,33 +368,27 @@ import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './
           const tuck = Math.sin(t * Math.PI) * 13;
           legPaths.forEach((leg, i) => leg.style.transform = `rotate(${i % 2 ? tuck : -tuck}deg)`);
         } else {
-          const bob = `translate(0 ${(-.55 * (1 - Math.cos(t * duration / 620 * Math.PI * 2))).toFixed(3)})`;
-          body.setAttribute('transform', bob); head.setAttribute('transform', bob); tail.setAttribute('transform', bob);
+          standOn(support, from.x + (to.x - from.x) * t, { gait: t * duration / 620 * Math.PI * 2 });
         }
       }, token)) return;
       legPaths.forEach(leg => leg.style.removeProperty('transform'));
       pose(1);
-      if (climb) {
+      if (!walking) {
         cat.classList.remove('is-jumping');
-        cat.classList.add('is-climbing');
-        // Forepaws stay on the ledge while shoulders lift and hind legs follow.
-        if (!await frameSequence(reducedMotion.matches ? 100 : 780, t => {
-          const pull = phase(t, .15, 1);
-          const remaining = gripDepth * (1 - pull);
-          moveWorld(to.x, to.y + remaining);
-          const ledge = footOffset - remaining;
-          legPaths.forEach((leg, i) => {
-            leg.setAttribute('d', i % 2
-              ? `M43 25Q48 ${ledge - 3} 49 ${ledge}`
-              : `M20 26Q15 31 ${18 + pull * 2} ${33 + pull * 6}`);
-          });
-          head.setAttribute('transform', `rotate(${-8 * (1 - pull)} 43 25)`);
+        cat.classList.add('is-landing');
+        // A brief catch, then a small knee bend and immediate extension.
+        // Paws stay at the ledge while the body absorbs the landing.
+        if (!await frameSequence(reducedMotion.matches ? 60 : 240, t => {
+          const remaining = gripDepth * (1 - phase(t, 0, .25));
+          const bendPhase = climb ? phase(t, .18, 1) : t;
+          const bend = 2.2 * Math.sin(Math.PI * bendPhase);
+          standOn(support, to.x, { bend, offset: remaining });
         }, token)) return;
-        cat.classList.remove('is-climbing');
+        cat.classList.remove('is-landing');
         pose(1);
+        standOn(support, to.x);
       }
-      if (!walking && !await frameSequence(reducedMotion.matches ? 50 : 260, () => {}, token)) return;
-      from = to;
+      from = { ...to, y: world.y };
     }
     cat.classList.remove('is-running', 'is-jumping');
     if (!await frameSequence(reducedMotion.matches ? 100 : 1100, t => pose(1 - t, true), token)) return;
@@ -377,6 +409,28 @@ import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight } from './
   window.addEventListener('pointerup', event => release(event));
   window.addEventListener('pointercancel', event => release(event, true));
   cat.addEventListener('keydown', event => { if (event.key === 'Escape' && roaming) { release(null, true); restoreHome(); } });
+  function terrainChanged() {
+    if (!roaming || drag) return;
+    cancelJourney();
+    busy = true;
+    cat.classList.remove('is-looking', 'is-jumping', 'is-landing', 'is-grounded');
+    landAndReturn();
+  }
+  const contentChanges = new MutationObserver(records => {
+    const relevant = records.some(record => {
+      const target = record.target.nodeType === 1 ? record.target : record.target.parentElement;
+      if (target?.closest('.cat, .portrait')) return false;
+      if (record.type !== 'childList') return true;
+      return [...record.addedNodes, ...record.removedNodes].some(node =>
+        !(node.nodeType === 1 && node.matches('.cat, .cat-baseline-probe')));
+    });
+    if (relevant) terrainChanged();
+  });
+  contentChanges.observe(document.querySelector('.page'), {
+    subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['style', 'class'],
+  });
+  document.fonts?.addEventListener('loadingdone', terrainChanged);
+  document.querySelector('.portrait-fallback')?.addEventListener('load', terrainChanged);
   window.addEventListener('resize', () => {
     if (roaming) restoreHome(); else { sleep(); place(position); }
   }, { passive: true });
