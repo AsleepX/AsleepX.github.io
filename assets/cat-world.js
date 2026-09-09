@@ -1,6 +1,6 @@
 import { textContours, imageContour, contactAt, standingHeight } from './cat-surfaces.js?v=83e46912';
 export { contactAt, standingHeight } from './cat-surfaces.js?v=83e46912';
-import { photoPlatforms } from './cat-photo-world.js?v=1827c493';
+import { photoPlatforms } from './cat-photo-world.js?v=b3848364';
 // The page is a set of one-way platforms: jumps pass through from below.
 export const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 export function collectPlatforms(track) {

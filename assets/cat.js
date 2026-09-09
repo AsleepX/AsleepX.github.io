@@ -1,4 +1,4 @@
-import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=cf847456';
+import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=7f3dd2fe';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
 

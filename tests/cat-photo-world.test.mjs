@@ -26,6 +26,19 @@ test('the white doorframe bottom is not a standing surface', () => {
   assert.equal(landing.id, 'photo-passing-cat-ground');
 });
 
+test('chair left arc follows the photographed tube rather than the space above it', () => {
+  const platforms = photoPlatforms('passing-cat',{left:0,top:0,width:2200,height:1650});
+  const chair = platforms.find(p=>p.id.endsWith('chair-back'));
+  assert.equal(chair.left,352);
+  // At x=.18 the real left tube is below y=.325, not at the old y≈.28.
+  const landing = firstLanding(platforms,2200*.18,1650*.31);
+  assert.equal(landing.id,'photo-passing-cat-chair-back');
+  assert(landing.y>1650*.325 && landing.y<1650*.35);
+  // Preserve the previously aligned right side.
+  const rightY = chair.contour[Math.round(2200*.367-chair.profileLeft)];
+  assert(Math.abs(rightY-1650*.326)<1);
+});
+
 test('support points track responsive image scaling and document position', () => {
   const a = photoPlatforms('quiet-room',rect).find(p=>p.id.endsWith('fridge-door'));
   const b = photoPlatforms('quiet-room',{left:100,top:800,width:720,height:480}).find(p=>p.id.endsWith('fridge-door'));
