@@ -84,25 +84,21 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 .cat[hidden] { display: none; }
 .cat svg { display: block; width: 56px; height: 44px; overflow: visible; transform: scaleX(var(--cat-direction, 1)); }
 .cat:focus-visible { outline: 1px dashed #606570; outline-offset: 3px; border-radius: 8px; }
-.cat-run { opacity: 0; transform-origin: 32px 40px; }
-.cat-sleep { transform-origin: 32px 40px; }
-.cat.is-running .cat-sleep { opacity: 0; }
-.cat.is-running .cat-run { opacity: 1; animation: cat-bob 360ms ease-in-out infinite; }
-.cat-leg-back { transform-origin: 20px 27px; }
-.cat-leg-front { transform-origin: 41px 26px; }
-.cat.is-running .cat-leg { animation: cat-stride 480ms ease-in-out infinite; }
-.cat.is-running .cat-leg-b { animation-delay: -240ms; }
-.cat.is-waking .cat-sleep { animation: cat-wake-curl 700ms ease-in-out forwards; }
-.cat.is-waking .cat-run { animation: cat-stand 700ms ease-in-out forwards; }
-.cat.is-settling .cat-run { animation: cat-lie-down 600ms ease-in-out forwards; }
-.cat.is-settling .cat-sleep { animation: cat-curl-up 600ms ease-in-out forwards; }
-@keyframes cat-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.5px); } }
-@keyframes cat-stride { 0%, 100% { transform: rotate(-27deg); } 50% { transform: rotate(27deg); } }
-@keyframes cat-wake-curl { 0% { opacity: 1; transform: scale(1); } 40% { opacity: 1; transform: scale(1.08, .9); } 85%, 100% { opacity: 0; transform: scale(.95, 1.15); } }
-@keyframes cat-stand { 0%, 35% { opacity: 0; transform: scaleY(.6); } 75% { opacity: 1; } 100% { opacity: 1; transform: scaleY(1); } }
-@keyframes cat-lie-down { 0% { opacity: 1; transform: scaleY(1); } 65% { opacity: .6; } 100% { opacity: 0; transform: scaleY(.65); } }
-@keyframes cat-curl-up { 0%, 30% { opacity: 0; transform: scale(1.1, .85); } 100% { opacity: 1; transform: scale(1); } }
+/* Both poses share one torso and head; only posture and limbs change. */
+.cat-torso { transform: translateY(5px); transition: transform 650ms cubic-bezier(.4,0,.2,1); }
+.cat-legs { transform-origin: 32px 29px; transform: scaleY(.12); transition: transform 650ms ease-in-out; }
+.cat-tail-raised { opacity: 0; transition: opacity 500ms ease; }
+.cat-tail-curled { opacity: 1; transition: opacity 500ms ease; }
+.cat:is(.is-waking, .is-running) .cat-torso { transform: translateY(0); }
+.cat:is(.is-waking, .is-running) .cat-legs { transform: scaleY(1); }
+.cat:is(.is-waking, .is-running) .cat-tail-raised { opacity: 1; }
+.cat:is(.is-waking, .is-running) .cat-tail-curled { opacity: 0; }
+.cat-leg-back { transform-origin: 20px 28px; }
+.cat-leg-front { transform-origin: 43px 28px; }
+.cat.is-running .cat-leg { animation: cat-stride 620ms ease-in-out infinite; }
+.cat.is-running .cat-leg-b { animation-delay: -310ms; }
+@keyframes cat-stride { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }
 @media (prefers-reduced-motion: reduce) {
-  .tongue { transition: none; }
-  .cat.is-running .cat-run, .cat.is-running .cat-leg { animation: none; }
+  .tongue, .cat-torso, .cat-legs, .cat-tail-raised, .cat-tail-curled { transition: none; }
+  .cat.is-running .cat-leg { animation: none; }
 }

@@ -52,7 +52,7 @@
         running = null;
         cat.classList.remove('is-running');
         cat.classList.add('is-settling');
-        phaseTimer = setTimeout(sleep, 600);
+        phaseTimer = setTimeout(sleep, 650);
       };
     }, 700);
   });

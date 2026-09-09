@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#ffffff">
   <title>Zixuan Zhao — AsleepX</title>
   <link rel="icon" href="assets/me.png" type="image/png">
-  <link rel="stylesheet" href="assets/style.css">
+  <link rel="stylesheet" href="assets/style.css?v=e934fc03">
   <script src="assets/portrait.js" defer></script>
-  <script src="assets/cat.js" defer></script>
+  <script src="assets/cat.js?v=9a490214" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -69,22 +69,18 @@
       <div class="cat-track">
         <button class="cat" type="button" aria-label="Wake the sleeping cat" title="Wake the sleeping cat" hidden>
           <svg viewBox="0 0 64 44" aria-hidden="true" focusable="false">
-            <g class="cat-sleep" fill="#000">
-              <path d="M13 39C3 35 4 22 15 16C27 9 45 13 49 25C56 27 58 32 55 36C49 42 23 43 13 39Z"/>
-              <path d="M37 26L38 10L46 17L55 11L54 29Q48 36 41 32Z"/>
-              <path d="M13 28C3 37 20 44 39 38" fill="none" stroke="#000" stroke-width="7" stroke-linecap="round"/>
+            <g class="cat-legs" fill="none" stroke="#000" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round">
+              <path class="cat-leg cat-leg-back cat-leg-b" d="M20 28Q24 33 21 39"/>
+              <path class="cat-leg cat-leg-front cat-leg-a" d="M43 28Q42 34 44 39"/>
+              <path class="cat-leg cat-leg-back cat-leg-a" d="M20 28Q16 33 18 39"/>
+              <path class="cat-leg cat-leg-front cat-leg-b" d="M43 28Q46 34 44 39"/>
             </g>
-            <g class="cat-run" fill="#000">
-              <ellipse cx="29" cy="24" rx="17" ry="9"/>
-              <path d="M41 24L42 9L48 14L55 10L56 24Q51 32 43 28Z"/>
-              <path d="M14 23Q3 22 5 11" fill="none" stroke="#000" stroke-width="5" stroke-linecap="round"/>
-              <g stroke="#000" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" fill="none">
-                <path class="cat-leg cat-leg-back cat-leg-a" d="M20 27L17 33L19 39L23 39"/>
-                <path class="cat-leg cat-leg-front cat-leg-b" d="M41 26L43 33L42 39L46 39"/>
-                <path class="cat-leg cat-leg-back cat-leg-b" d="M20 27L23 33L21 39L25 39"/>
-                <path class="cat-leg cat-leg-front cat-leg-a" d="M41 26L38 33L40 39L44 39"/>
-              </g>
+            <path class="cat-tail-raised" d="M15 26C6 28 3 21 5 16C6 13 9 14 8 17" fill="none" stroke="#000" stroke-width="3.5" stroke-linecap="round"/>
+            <g class="cat-torso" fill="#000">
+              <path d="M11 26C10 18 16 13 25 13C33 13 36 17 43 18C48 19 50 24 46 29C40 35 18 37 13 31Q11 29 11 26Z"/>
+              <path d="M40 23L40 14Q40 11 42 12L46 16Q48 16 50 17L54 14Q56 13 56 16L56 23Q58 25 55 27C51 31 43 30 40 26Z"/>
             </g>
+            <path class="cat-tail-curled" d="M13 30C5 33 9 40 21 40L40 40Q46 40 46 36" fill="none" stroke="#000" stroke-width="4.5" stroke-linecap="round"/>
           </svg>
         </button>
       </div>
