@@ -1,5 +1,6 @@
 import { textContours, imageContour, contactAt, standingHeight } from './cat-surfaces.js?v=83e46912';
 export { contactAt, standingHeight } from './cat-surfaces.js?v=83e46912';
+import { photoPlatforms } from './cat-photo-world.js?v=1827c493';
 // The page is a set of one-way platforms: jumps pass through from below.
 export const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 export function collectPlatforms(track) {
@@ -7,7 +8,7 @@ export function collectPlatforms(track) {
   const add = (id, left, right, y, contour = null) => {
     left = Math.max(28, left);
     right = Math.min(document.documentElement.clientWidth - 28, right);
-    if (right - left >= 12 && Number.isFinite(y)) platforms.push({ ...contour, id, left, right, y });
+    if (right - left >= (contour?.photo ? 5 : 12) && Number.isFinite(y)) platforms.push({ ...contour, id, left, right, y });
   };
   const rect = element => {
     const r = element.getBoundingClientRect();
@@ -20,6 +21,13 @@ export function collectPlatforms(track) {
   });
   const portrait = imageContour(document.querySelector('.portrait-fallback'));
   if (portrait) add('portrait', portrait.left, portrait.right, portrait.y, portrait);
+  document.querySelectorAll('.photo-gallery img[data-cat-scene]').forEach(image => {
+    if (!image.complete || !image.naturalWidth) return;
+    const r = image.getBoundingClientRect();
+    for (const p of photoPlatforms(image.dataset.catScene, {
+      left:r.left+scrollX,top:r.top+scrollY,width:r.width,height:r.height,
+    })) add(p.id,p.left,p.right,p.y,p);
+  });
   // Range rectangles preserve actual text wrapping, including responsive line breaks.
   const walker = document.createTreeWalker(document.querySelector('.page'), NodeFilter.SHOW_TEXT);
   let text;
@@ -65,6 +73,7 @@ function clearLandingArc(a, b, platforms) {
   const A = 4 * height, B = b.y - a.y - 4 * height;
   for (const p of platforms) {
     if (p.id === b.platform || p.id === a.platform) continue;
+    if (Math.max(a.y,b.y) < p.y) continue;
     if (p.contour) {
       if (Math.max(a.x, b.x) < p.left || Math.min(a.x, b.x) > p.right) continue;
       // Sample descending crossings against the ink at that x, not its tallest glyph.
@@ -136,7 +145,6 @@ export function findRoute(platforms, start, homeX, extended = false) {
       const b = nodes[v], same = a.platform === b.platform;
       const dx = Math.abs(b.x - a.x), dy = b.y - a.y;
       if (!same && (dx > 96 || dy < -(extended ? sparseGap : 130) || dy > 260)) continue;
-      if (!same && !clearLandingArc(a, b, platforms)) continue;
       let cost = same ? dx : jumpLength(a, b);
       if (same && byId.get(a.platform)?.contour) {
         const table = walks.get(a.platform);
@@ -144,6 +152,8 @@ export function findRoute(platforms, start, homeX, extended = false) {
         const ib = clamp(Math.round(b.x - table.left), 0, table.width - 1);
         cost = table.gaps[ia] === table.gaps[ib] ? Math.abs(table.length[ia] - table.length[ib]) : Infinity;
       }
+      if (distances[u] + cost >= distances[v]) continue;
+      if (!same && !clearLandingArc(a, b, platforms)) continue;
       // All jump arcs are one-way-platform traversals, not solid-wall collisions.
       if (distances[u] + cost < distances[v]) {
         distances[v] = distances[u] + cost;

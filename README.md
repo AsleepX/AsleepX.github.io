@@ -30,6 +30,12 @@ Reduced motion keeps the ears and whiskers still.
 Three photographs appear uncropped in a responsive gallery. Select a photograph
 to open the larger version; use the arrow buttons or arrow keys to browse and
 Escape to close. Smaller preview files keep the homepage light.
+The gallery photographs are also cat playgrounds: drops above a photograph land
+on its edge, while drops inside use traced refrigerator, table, chair, windowsill,
+tree, roof, and ground surfaces. These one-way platforms join the return route.
+Their normalized coordinates follow responsive image sizing. Scene maps live in
+`assets/cat-photo-world.js`; replacing a photograph requires tracing its new objects.
+While holding the cat, move toward the viewport edge to scroll to the gallery.
 
 Run `node --test tests/*.test.mjs` to check landing, route planning, and fusion.
 

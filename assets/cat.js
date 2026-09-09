@@ -1,4 +1,4 @@
-import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=5e4a87a9';
+import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=cf847456';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
 
@@ -252,12 +252,21 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
   }));
   function watchFace() {
     if (fusionFrame || fused) return;
+    let previousTime = performance.now();
     function tick(now) {
       fusionFrame = 0;
       if (document.hidden || !roaming || !(drag?.active || faceWaiting)) {
         stopFusionWatch();
         return;
       }
+      if (drag?.active) {
+        const edge = 56;
+        const down = clamp((drag.clientY - (innerHeight - edge)) / edge, 0, 1);
+        const up = clamp((edge - drag.clientY) / edge, 0, 1);
+        const delta = (down - up) * Math.min(32, now - previousTime) * .45;
+        if (delta) window.scrollBy(0, delta);
+      }
+      previousTime = now;
       const inside = isOverFace();
       if (dwell(inside, now)) { fuseWithPortrait(); return; }
       if (faceWaiting && !inside) {
@@ -279,6 +288,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
     cat.style.transform = `translate(${x - halfWidth}px, ${y - footOffset}px)`;
   }
   function standOn(surface, x, { bend = 0, gait = null, duration = 0, offset = 0 } = {}) {
+    cat.dataset.surface = surface.id;
     const facing = cat.style.getPropertyValue('--cat-direction') === '-1' ? -1 : 1;
     const back = contactAt(surface, x - 10.5 * facing);
     const front = contactAt(surface, x + 10.5 * facing);
@@ -351,6 +361,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
     cat.classList.remove('is-roaming');
     cat.removeAttribute('data-grab');
     cat.style.removeProperty('transform');
+    cat.removeAttribute('data-surface');
     track.append(cat);
     roaming = false;
     place(limit() * .72);
@@ -401,6 +412,8 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
     cancelJourney();
     busy = true;
     drag.active = true;
+    drag.clientX = event.clientX;
+    drag.clientY = event.clientY;
     faceWaiting = false;
     drag.part = part;
     suppressClick = true;
@@ -429,10 +442,18 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
     if (!drag.active && Math.hypot(event.pageX - drag.startX, event.pageY - drag.startY) > 3) beginDrag(event);
     if (!drag.active) return;
     event.preventDefault();
+    drag.clientX = event.clientX;
+    drag.clientY = event.clientY;
     const x = clamp(event.pageX - drag.offset.x + halfWidth, 40, document.documentElement.clientWidth - 40);
     const y = Math.max(footOffset, event.pageY - drag.offset.y + footOffset);
     moveWorld(x, y);
   });
+  // Keep the held cat under the pointer when scrolling down to the gallery.
+  window.addEventListener('scroll', () => {
+    if (!drag?.active) return;
+    moveWorld(clamp(drag.clientX + scrollX - drag.offset.x + halfWidth, 40, document.documentElement.clientWidth - 40),
+      Math.max(footOffset, drag.clientY + scrollY - drag.offset.y + footOffset));
+  }, {passive:true});
   async function landAndReturn() {
     const token = journey;
     pose(1);
@@ -557,6 +578,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
   });
   document.fonts?.addEventListener('loadingdone', terrainChanged);
   document.querySelector('.portrait-fallback')?.addEventListener('load', terrainChanged);
+  document.querySelectorAll('.photo-gallery img').forEach(image => image.addEventListener('load', terrainChanged));
   window.addEventListener('resize', () => {
     if (roaming) restoreHome(); else { sleep(); place(position); }
   }, { passive: true });
