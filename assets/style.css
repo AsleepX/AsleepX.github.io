@@ -84,21 +84,14 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 .cat[hidden] { display: none; }
 .cat svg { display: block; width: 56px; height: 44px; overflow: visible; transform: scaleX(var(--cat-direction, 1)); }
 .cat:focus-visible { outline: 1px dashed #606570; outline-offset: 3px; border-radius: 8px; }
-/* Both poses share one torso and head; only posture and limbs change. */
-.cat-torso { transform: translateY(5px); transition: transform 650ms cubic-bezier(.4,0,.2,1); }
-.cat-legs { transform-origin: 32px 29px; transform: scaleY(.12); transition: transform 650ms ease-in-out; }
-.cat-tail-raised { opacity: 0; transition: opacity 500ms ease; }
-.cat-tail-curled { opacity: 1; transition: opacity 500ms ease; }
-.cat:is(.is-waking, .is-running) .cat-torso { transform: translateY(0); }
-.cat:is(.is-waking, .is-running) .cat-legs { transform: scaleY(1); }
-.cat:is(.is-waking, .is-running) .cat-tail-raised { opacity: 1; }
-.cat:is(.is-waking, .is-running) .cat-tail-curled { opacity: 0; }
+/* Grounded feet and continuously reshaped body/tail share a single rig. */
+.cat-legs { transform-origin: 32px 39px; transform: scaleY(.12); }
 .cat-leg-back { transform-origin: 20px 28px; }
 .cat-leg-front { transform-origin: 43px 28px; }
 .cat.is-running .cat-leg { animation: cat-stride 620ms ease-in-out infinite; }
 .cat.is-running .cat-leg-b { animation-delay: -310ms; }
 @keyframes cat-stride { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }
 @media (prefers-reduced-motion: reduce) {
-  .tongue, .cat-torso, .cat-legs, .cat-tail-raised, .cat-tail-curled { transition: none; }
+  .tongue { transition: none; }
   .cat.is-running .cat-leg { animation: none; }
 }
