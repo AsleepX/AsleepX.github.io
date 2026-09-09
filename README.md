@@ -20,8 +20,13 @@ text edits and font loading refresh an active journey automatically.
 On steep contours, unreachable paws release into a hanging pose instead of stretching.
 Click-to-walk and drag-return share the same leg swing and body motion; contour
 contact adjustments are applied to that gait when walking over text or the avatar.
+Hold or release the cat over the portrait's face for four continuous seconds to
+fuse them. Moving within the face keeps the timer going; leaving resets it. The
+cat fades away and the portrait gains independently twitching ears and curved
+whiskers that sway gently from their roots. Refresh the page to restore the cat.
+Reduced motion keeps the ears and whiskers still.
 
-Run `node --test tests/cat-world.test.mjs` to check landing and route planning.
+Run `node --test tests/*.test.mjs` to check landing, route planning, and fusion.
 
 ## Local preview
 

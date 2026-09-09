@@ -1,5 +1,6 @@
 import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=5e4a87a9';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
+import { overFace, fusionDwell } from './cat-fusion.js?v=a79e4375';
 
 (() => {
   const cat = document.querySelector('.cat');
@@ -176,6 +177,62 @@ import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
   let world = { x: 0, y: 0 }; // center of the paws in document coordinates
   const footOffset = 39;
   const halfWidth = 28;
+  const portrait = document.querySelector('.portrait');
+  const dwell = fusionDwell();
+  let fusionFrame = 0;
+  let faceWaiting = false;
+  let fused = false;
+  const isOverFace = () => portrait && overFace(cat.getBoundingClientRect(), portrait.getBoundingClientRect());
+  function stopFusionWatch() {
+    cancelAnimationFrame(fusionFrame);
+    fusionFrame = 0;
+    dwell(false, performance.now());
+  }
+  function fuseWithPortrait() {
+    fused = true;
+    faceWaiting = false;
+    stopFusionWatch();
+    clearTimeout(holdTimer);
+    if (drag) {
+      const id = drag.pointerId;
+      drag = null;
+      if (cat.hasPointerCapture(id)) cat.releasePointerCapture(id);
+    }
+    document.documentElement.classList.remove('cat-dragging');
+    cancelJourney();
+    busy = true;
+    pose(1);
+    rig.removeAttribute('transform');
+    cat.classList.remove('is-held', 'is-looking', 'is-running', 'is-jumping');
+    cat.classList.add('is-fusing');
+    portrait.classList.add('is-cat');
+    portrait.setAttribute('aria-label', 'Zixuan Zhao with animated cat ears and whiskers');
+    const transform = cat.style.transform;
+    const dissolve = cat.animate([
+      {opacity:1, transform}, {opacity:0, transform:`${transform} scale(.15)`},
+    ], {duration:reducedMotion.matches ? 0 : 550, easing:'ease-in', fill:'forwards'});
+    dissolve.onfinish = () => { cat.hidden = true; dissolve.cancel(); };
+  }
+  function watchFace() {
+    if (fusionFrame || fused) return;
+    function tick(now) {
+      fusionFrame = 0;
+      if (document.hidden || !roaming || !(drag?.active || faceWaiting)) {
+        stopFusionWatch();
+        return;
+      }
+      const inside = isOverFace();
+      if (dwell(inside, now)) { fuseWithPortrait(); return; }
+      if (faceWaiting && !inside) {
+        faceWaiting = false;
+        stopFusionWatch();
+        landAndReturn();
+        return;
+      }
+      fusionFrame = requestAnimationFrame(tick);
+    }
+    fusionFrame = requestAnimationFrame(tick);
+  }
   const homePoint = () => {
     const r = track.getBoundingClientRect();
     return { x: r.left + scrollX + limit() * .72 + halfWidth, y: r.top + scrollY };
@@ -241,6 +298,9 @@ import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
     moveWorld(current.x, current.y);
   }
   function restoreHome() {
+    if (fused) return;
+    faceWaiting = false;
+    stopFusionWatch();
     if (drag) {
       const pointerId = drag.pointerId;
       drag = null;
@@ -304,6 +364,7 @@ import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
     cancelJourney();
     busy = true;
     drag.active = true;
+    faceWaiting = false;
     drag.part = part;
     suppressClick = true;
     cat.classList.remove('is-looking', 'is-jumping', 'is-climbing', 'is-landing', 'is-grounded');
@@ -314,9 +375,10 @@ import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
     const facing = getComputedStyle(cat).getPropertyValue('--cat-direction').trim() === '-1' ? -1 : 1;
     drag.offset = { x: (facing < 0 ? 64 - pivot[0] : pivot[0]) * .875, y: pivot[1] * .875 + 2.75 };
     moveWorld(event.pageX - drag.offset.x + halfWidth, event.pageY - drag.offset.y + footOffset);
+    watchFace();
   }
   cat.addEventListener('pointerdown', event => {
-    if (event.button !== 0 || drag) return;
+    if (event.button !== 0 || drag || fused) return;
     // Read the unrotated image coordinates before taking pointer capture.
     const point = new DOMPoint(event.clientX, event.clientY).matrixTransform(svg.getScreenCTM().inverse());
     drag = { pointerId: event.pointerId, local: point, startX: event.pageX, startY: event.pageY, active: false };
@@ -418,7 +480,18 @@ import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
     if (cat.hasPointerCapture(drag.pointerId)) cat.releasePointerCapture(drag.pointerId);
     drag = null;
     if (canceled) { if (active) restoreHome(); }
-    else if (active) landAndReturn();
+    else if (active && isOverFace()) {
+      // Releasing on the face keeps the cat there for the remaining dwell time.
+      faceWaiting = true;
+      cat.classList.remove('is-held');
+      cat.removeAttribute('data-grab');
+      rig.removeAttribute('transform');
+      pose(1);
+      watchFace();
+    } else if (active) {
+      stopFusionWatch();
+      landAndReturn();
+    }
     // The click immediately following pointerup must not wake a just-dropped cat.
     setTimeout(() => { suppressClick = false; }, 0);
   }
@@ -426,7 +499,7 @@ import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
   window.addEventListener('pointercancel', event => release(event, true));
   cat.addEventListener('keydown', event => { if (event.key === 'Escape' && roaming) { release(null, true); restoreHome(); } });
   function terrainChanged() {
-    if (!roaming || drag) return;
+    if (!roaming || drag || faceWaiting || fused) return;
     cancelJourney();
     busy = true;
     cat.classList.remove('is-looking', 'is-jumping', 'is-landing', 'is-grounded');

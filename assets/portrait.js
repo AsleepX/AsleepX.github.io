@@ -77,6 +77,7 @@
     frame = 0;
     portrait.classList.remove('is-blinking', 'is-cheeky');
     portrait.classList.toggle('is-alive', active());
+    portrait.classList.toggle('is-paused', !active());
     if (active()) {
       queueGaze();
       later(blink, 1800 + Math.random() * 2200);
