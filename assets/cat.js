@@ -175,7 +175,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=1199cf88';
   let journeyFrame = 0;
   let holdTimer;
   let world = { x: 0, y: 0 }; // center of the paws in document coordinates
-  const footOffset = 39;
+  const footOffset = parseFloat(getComputedStyle(cat).getPropertyValue('--cat-ground-offset')) || 39;
   const halfWidth = 28;
   const portrait = document.querySelector('.portrait');
   const dwell = fusionDwell();
