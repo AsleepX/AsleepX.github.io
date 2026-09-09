@@ -1,7 +1,12 @@
 # Zixuan Zhao — personal website
 
 A minimal English academic homepage, built with semantic HTML and responsive CSS.
-No JavaScript, external fonts, dependencies, or build step.
+No external fonts, dependencies, or build step.
+
+The avatar uses a small vanilla JavaScript animation and SVG facial layers:
+its eyes follow the pointer, it blinks naturally, and occasionally sticks out
+its tongue. Animation pauses offscreen and in hidden tabs. Reduced-motion
+preferences and disabled JavaScript retain the original static portrait.
 
 ## Local preview
 

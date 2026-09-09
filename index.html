@@ -8,6 +8,7 @@
   <title>Zixuan Zhao — AsleepX</title>
   <link rel="icon" href="assets/me.png" type="image/png">
   <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/portrait.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -28,7 +29,41 @@
             School of Computer Science and Artificial Intelligence<br>
             Shanghai University of Finance and Economics</p>
         </div>
-        <img class="portrait" src="assets/me.png" alt="Black-and-white illustrated avatar of Zixuan Zhao" width="1254" height="1254" fetchpriority="high">
+        <div class="portrait" role="img" aria-label="Black-and-white illustrated avatar of Zixuan Zhao">
+          <img class="portrait-fallback" src="assets/me.png" alt="" width="1254" height="1254" fetchpriority="high">
+          <svg class="portrait-live" viewBox="0 0 1254 1254" aria-hidden="true" focusable="false">
+            <defs>
+              <mask id="face-features" maskUnits="userSpaceOnUse" x="0" y="0" width="1254" height="1254">
+                <rect width="1254" height="1254" fill="white"/>
+                <rect x="375" y="522" width="154" height="92" rx="15" fill="black"/>
+                <rect x="650" y="502" width="161" height="98" rx="15" fill="black"/>
+                <rect x="560" y="735" width="112" height="36" rx="16" fill="black"/>
+              </mask>
+              <clipPath id="left-eye-space"><path d="M386 572 Q455 501 518 562 L530 611 L387 614Z"/></clipPath>
+              <clipPath id="right-eye-space"><path d="M660 548 Q730 490 800 548 L803 598 L662 603Z"/></clipPath>
+            </defs>
+            <image href="assets/me.png" width="1254" height="1254" mask="url(#face-features)"/>
+            <g class="eye-blink">
+              <g clip-path="url(#left-eye-space)">
+                <g class="pupil"><ellipse cx="482" cy="569" rx="31" ry="42" fill="#0b0c09"/></g>
+              </g>
+              <path d="M389 573 Q454 509 515 561" fill="none" stroke="#0b0c09" stroke-width="18" stroke-linecap="round"/>
+              <path d="M423 546 L414 532" fill="none" stroke="#0b0c09" stroke-width="12" stroke-linecap="round"/>
+            </g>
+            <g class="eye-blink">
+              <g clip-path="url(#right-eye-space)">
+                <g class="pupil"><ellipse cx="736" cy="555" rx="31" ry="41" fill="#0b0c09"/></g>
+              </g>
+              <path d="M664 547 Q730 489 798 546" fill="none" stroke="#0b0c09" stroke-width="18" stroke-linecap="round"/>
+              <path d="M697 520 L687 510" fill="none" stroke="#0b0c09" stroke-width="11" stroke-linecap="round"/>
+            </g>
+            <g class="tongue">
+              <path d="M608 752 L646 751 L645 779 Q631 802 613 781Z" fill="#fff" stroke="#0b0c09" stroke-width="8" stroke-linejoin="round"/>
+              <path d="M628 756 L628 774" fill="none" stroke="#0b0c09" stroke-width="5" stroke-linecap="round"/>
+            </g>
+            <path d="M574 757 Q614 750 657 751" fill="none" stroke="#0b0c09" stroke-width="15" stroke-linecap="round"/>
+          </svg>
+        </div>
       </section>
       <section class="info-row" id="research" aria-labelledby="research-heading">
         <h2 id="research-heading">Research</h2>
