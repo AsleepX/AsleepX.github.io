@@ -1,5 +1,5 @@
-import { textContours, imageContour, contactAt, standingHeight } from './cat-surfaces.js?v=83e46912';
-export { contactAt, standingHeight } from './cat-surfaces.js?v=83e46912';
+import { textContours, imageContour, contactAt, standingHeight } from './cat-surfaces.js?v=5f8a2cd5';
+export { contactAt, standingHeight } from './cat-surfaces.js?v=5f8a2cd5';
 import { photoPlatforms } from './cat-photo-world.js?v=b3848364';
 // The page is a set of one-way platforms: jumps pass through from below.
 export const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -21,6 +21,12 @@ export function collectPlatforms(track) {
   });
   const portrait = imageContour(document.querySelector('.portrait-fallback'));
   if (portrait) add('portrait', portrait.left, portrait.right, portrait.y, portrait);
+  // The topmost ink in a column is hair. Shoulders need separate lower layers
+  // so a drop below the hair can still land on the actual clothing silhouette.
+  for (const [side,left,right] of [['left',.17,.43],['right',.63,.85]]) {
+    const shoulder = imageContour(document.querySelector('.portrait-fallback'), {left,right,top:.74,bottom:.95});
+    if (shoulder) add(`portrait-${side}-shoulder`,shoulder.left,shoulder.right,shoulder.y,shoulder);
+  }
   document.querySelectorAll('.photo-gallery img[data-cat-scene]').forEach(image => {
     if (!image.complete || !image.naturalWidth) return;
     const r = image.getBoundingClientRect();

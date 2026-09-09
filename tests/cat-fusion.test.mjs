@@ -2,6 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { fusionDwell, overFace } from '../assets/cat-fusion.js';
 
+test('a shoulder drop does not trigger face fusion', () => {
+  const portrait={left:100,top:100,width:200,height:200};
+  for (const x of [.35,.66]) {
+    const cat={left:100+200*x-28,top:100+200*.76-39,width:56,height:44};
+    assert.equal(overFace(cat,portrait),false);
+  }
+});
+
 test('holding still or moving inside the face fuses after four continuous seconds', () => {
   const dwell = fusionDwell();
   const portrait = {left:100,top:100,width:200,height:200};

@@ -1,18 +1,24 @@
 // Collision data comes from rasterized ink, not line boxes or image rectangles.
-export function scanContour(data, width, height, scale, left, top, dark = false) {
-  const contour = new Float64Array(Math.ceil(width / scale)).fill(NaN);
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < height; y++) {
+export function scanContour(data, width, height, scale, left, top, dark = false, bounds = null) {
+  const xStart = Math.max(0, Math.floor(bounds?.left ?? 0));
+  const xEnd = Math.min(width, Math.ceil(bounds?.right ?? width));
+  const yStart = Math.max(0, Math.floor(bounds?.top ?? 0));
+  const yEnd = Math.min(height, Math.ceil(bounds?.bottom ?? height));
+  const firstColumn = Math.floor(xStart / scale);
+  const profileLeft = left + firstColumn;
+  const contour = new Float64Array(Math.ceil(xEnd / scale) - firstColumn).fill(NaN);
+  for (let x = xStart; x < xEnd; x++) {
+    for (let y = yStart; y < yEnd; y++) {
       const i = (y * width + x) * 4;
       const ink = data[i + 3] > 90 && (!dark || (data[i] + data[i + 1] + data[i + 2]) / 3 < 100);
       if (!ink) continue;
-      const column = Math.floor(x / scale), value = top + y / scale;
+      const column = Math.floor(x / scale) - firstColumn, value = top + y / scale;
       if (!Number.isFinite(contour[column]) || value < contour[column]) contour[column] = value;
       break;
     }
   }
   const occupied = [...contour].filter(Number.isFinite);
-  return occupied.length ? { left, right: left + contour.length - 1, y: Math.min(...occupied), profileLeft: left, contour } : null;
+  return occupied.length ? { left:profileLeft, right:profileLeft + contour.length - 1, y:Math.min(...occupied), profileLeft, contour } : null;
 }
 export function contactAt(platform, x, reach = 7) {
   if (!platform.contour) return x >= platform.left && x <= platform.right ? { x, y: platform.y } : null;
@@ -87,11 +93,13 @@ export function textContours(text) {
     context.getImageData(0, 0, canvas.width, canvas.height).data, canvas.width, canvas.height,
     scale, left + scrollX, top + scrollY)).filter(Boolean);
 }
-export function imageContour(image) {
+export function imageContour(image, region = null) {
   if (!image?.complete || !image.naturalWidth) return null;
   const r = image.getBoundingClientRect();
   const { canvas, context, scale } = canvasFor(r.width, r.height);
   context.drawImage(image, 0, 0, r.width, r.height);
   return scanContour(context.getImageData(0, 0, canvas.width, canvas.height).data,
-    canvas.width, canvas.height, scale, r.left + scrollX, r.top + scrollY, true);
+    canvas.width, canvas.height, scale, r.left + scrollX, r.top + scrollY, true,
+    region && {left:region.left*canvas.width,right:region.right*canvas.width,
+      top:region.top*canvas.height,bottom:region.bottom*canvas.height});
 }

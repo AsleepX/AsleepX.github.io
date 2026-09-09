@@ -34,6 +34,26 @@ test('avatar contour ignores opaque white background', () => {
   assert(Number.isNaN(surface.contour[1]));
 });
 
+test('separate shoulder layers catch drops below hair on either side', () => {
+  const rgba = new Uint8ClampedArray(80*80*4).fill(255);
+  const ink = (x,y) => rgba.set([0,0,0,255],(y*80+x)*4);
+  for (let x=10;x<70;x++) ink(x,10);
+  for (let x=14;x<34;x++) ink(x,66-Math.floor((x-14)/5));
+  for (let x=50;x<68;x++) ink(x,63+Math.floor((x-50)/5));
+  const hair = {id:'portrait',...scanContour(rgba,80,80,1,100,100,true)};
+  const left = {id:'left',...scanContour(rgba,80,80,1,100,100,true,{left:13,right:35,top:59,bottom:76})};
+  const right = {id:'right',...scanContour(rgba,80,80,1,100,100,true,{left:50,right:68,top:59,bottom:76})};
+  const platforms=[hair,left,right,{id:'home',left:100,right:180,y:220}];
+  assert.equal(firstLanding(platforms,124,135).id,'left');
+  assert.equal(firstLanding(platforms,159,135).id,'right');
+  assert.equal(firstLanding(platforms,140,135).id,'home');
+  assert.equal(firstLanding(platforms,124,90).id,'portrait');
+  for (const p of [left,right]) {
+    const x=(p.left+p.right)/2;
+    assert.equal(findRoute(platforms,{x,y:standingHeight(p,x),platform:p.id},140).at(-1)?.platform,'home');
+  }
+});
+
 test('landing and independent paw contacts follow local curves rather than the highest point', () => {
   const contour = Float64Array.from({length:100}, (_, x) => 100 + x / 2);
   const surface = {id:'glyph',left:0,right:99,y:100,profileLeft:0,contour};
