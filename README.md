@@ -18,6 +18,8 @@ follow the dark silhouette. Paws find separate contact points and the body follo
 the slope. Sampling reads current content, font metrics, and wrapping on each drop;
 text edits and font loading refresh an active journey automatically.
 On steep contours, unreachable paws release into a hanging pose instead of stretching.
+Click-to-walk and drag-return share the same leg swing and body motion; contour
+contact adjustments are applied to that gait when walking over text or the avatar.
 
 Run `node --test tests/cat-world.test.mjs` to check landing and route planning.
 

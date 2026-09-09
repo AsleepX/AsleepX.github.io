@@ -1,5 +1,5 @@
 import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=5e4a87a9';
-import { groundedPaw } from './cat-pose.js?v=ba2c2122';
+import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 
 (() => {
   const cat = document.querySelector('.cat');
@@ -80,20 +80,27 @@ import { groundedPaw } from './cat-pose.js?v=ba2c2122';
     }
     poseFrame = requestAnimationFrame(step);
   }
+  function walkShape(elapsed, duration) {
+    const envelope = phase(elapsed, 0, 200) * (1 - phase(elapsed, duration - 200, duration));
+    const stride = elapsed / 620 * Math.PI * 2;
+    body.setAttribute('d', shapeBody(bodyStand,
+      Math.sin(stride) * .08 * envelope, Math.sin(stride) * .15 * envelope, 0));
+    return -.55 * (1 - Math.cos(stride)) * envelope;
+  }
+  function drawWalkingLeg(leg, {root, knee, paw}) {
+    leg.setAttribute('d', `M${root.x} ${root.y}Q${knee.x} ${knee.y} ${paw.x} ${paw.y}`);
+  }
   function walkBody(duration) {
     const start = performance.now();
     function step(now) {
       if (!running) return;
       const elapsed = now - start;
-      const envelope = phase(elapsed, 0, 200) * (1 - phase(elapsed, duration - 200, duration));
-      const stride = elapsed / 620 * Math.PI * 2;
       // A small whole-body shift remains visible at the 56px display size.
-      const rise = `translate(0 ${(-.55 * (1 - Math.cos(stride)) * envelope).toFixed(3)})`;
+      const rise = `translate(0 ${walkShape(elapsed, duration)})`;
       body.setAttribute('transform', rise);
       tail.setAttribute('transform', rise);
       head.setAttribute('transform', rise);
-      body.setAttribute('d', shapeBody(bodyStand,
-        Math.sin(stride) * .08 * envelope, Math.sin(stride) * .15 * envelope, 0));
+      legPaths.forEach((leg, i) => drawWalkingLeg(leg, walkingLeg(i, elapsed)));
       bodyFrame = requestAnimationFrame(step);
     }
     bodyFrame = requestAnimationFrame(step);
@@ -177,7 +184,7 @@ import { groundedPaw } from './cat-pose.js?v=ba2c2122';
     world = { x, y };
     cat.style.transform = `translate(${x - halfWidth}px, ${y - footOffset}px)`;
   }
-  function standOn(surface, x, { bend = 0, gait = null, offset = 0 } = {}) {
+  function standOn(surface, x, { bend = 0, gait = null, duration = 0, offset = 0 } = {}) {
     const facing = cat.style.getPropertyValue('--cat-direction') === '-1' ? -1 : 1;
     const back = contactAt(surface, x - 10.5 * facing);
     const front = contactAt(surface, x + 10.5 * facing);
@@ -186,7 +193,7 @@ import { groundedPaw } from './cat-pose.js?v=ba2c2122';
     moveWorld(x, centerY + offset);
     cat.classList.add('is-grounded');
     const angle = back && front ? clamp(Math.atan2(front.y - back.y, 21) * 180 / Math.PI, -32, 32) : 0;
-    const bob = gait === null ? 0 : -.55 * (1 - Math.cos(gait));
+    const bob = gait === null ? 0 : walkShape(gait, duration);
     const dy = bend + bob;
     const transform = `translate(0 ${dy}) rotate(${angle} 32 25)`;
     body.setAttribute('transform', transform);
@@ -194,20 +201,27 @@ import { groundedPaw } from './cat-pose.js?v=ba2c2122';
     tail.setAttribute('transform', transform);
     const radians = angle * Math.PI / 180;
     legPaths.forEach((leg, i) => {
+      const step = gait === null ? null : walkingLeg(i, gait);
+      // Flat platforms use exactly the click-to-walk pose.
+      if (step && !surface.contour) {
+        leg.style.removeProperty('transform');
+        drawWalkingLeg(leg, step);
+        return;
+      }
       const isFront = i % 2 === 1;
       const rootX = isFront ? 43 : 20, rootY = isFront ? 25 : 26;
       const rx = 32 + (rootX - 32) * Math.cos(radians) - (rootY - 25) * Math.sin(radians);
       const ry = 25 + (rootX - 32) * Math.sin(radians) + (rootY - 25) * Math.cos(radians) + dy;
-      const stride = gait === null ? 0 : Math.sin(gait + (i < 2 ? 0 : Math.PI)) * 2;
-      const desiredX = x + ((isFront ? 44 : 20) - 32 + stride) * .875 * facing;
+      const desiredX = x + ((step ? step.paw.x : isFront ? 44 : 20) - 32) * .875 * facing;
       const contact = contactAt(surface, desiredX) || (isFront ? front : back) || front || back;
       if (!contact) return;
       const footX = 32 + (contact.x - x) / (.875 * facing);
-      const swing = gait === null ? 0 : Math.max(0, Math.sin(gait + (i < 2 ? 0 : Math.PI))) * 1.4;
+      const swing = step ? Math.max(0, 39 - step.paw.y) : 0;
       const footY = (contact.y - (world.y - footOffset) - 2.75) / .875 - 1.8 - swing;
       const paw = groundedPaw({ x: rx, y: ry }, { x: footX, y: footY });
       leg.style.removeProperty('transform');
-      leg.setAttribute('d', `M${rx} ${ry}Q${(rx + paw.x) / 2 + (isFront ? 1 : -2)} ${(ry + paw.y) / 2} ${paw.x} ${paw.y}`);
+      const kneeBend = step ? step.knee.x - (step.root.x + step.paw.x) / 2 : isFront ? 1 : -2;
+      leg.setAttribute('d', `M${rx} ${ry}Q${(rx + paw.x) / 2 + kneeBend} ${(ry + paw.y) / 2} ${paw.x} ${paw.y}`);
     });
     return transform;
   }
@@ -368,7 +382,9 @@ import { groundedPaw } from './cat-pose.js?v=ba2c2122';
           const tuck = Math.sin(t * Math.PI) * 13;
           legPaths.forEach((leg, i) => leg.style.transform = `rotate(${i % 2 ? tuck : -tuck}deg)`);
         } else {
-          standOn(support, from.x + (to.x - from.x) * t, { gait: t * duration / 620 * Math.PI * 2 });
+          standOn(support, from.x + (to.x - from.x) * t, {
+            gait: reducedMotion.matches ? null : t * duration, duration,
+          });
         }
       }, token)) return;
       legPaths.forEach(leg => leg.style.removeProperty('transform'));

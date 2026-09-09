@@ -88,9 +88,7 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 .cat-legs { visibility: hidden; }
 .cat-leg-back { transform-origin: 20px 26px; }
 .cat-leg-front { transform-origin: 43px 25px; }
-.cat.is-running .cat-leg { animation: cat-stride 620ms ease-in-out infinite; }
-.cat.is-running .cat-leg-b { animation-delay: -310ms; }
-@keyframes cat-stride { 0%, 100% { transform: rotate(-18deg); } 50% { transform: rotate(18deg); } }
+/* Click and return journeys render the same 620ms gait in cat-pose.js. */
 @media (prefers-reduced-motion: reduce) {
   .tongue { transition: none; }
   .cat.is-running .cat-leg { animation: none; }
