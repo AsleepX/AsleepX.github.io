@@ -1,8 +1,44 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { firstLanding, findRoute } from '../assets/cat-world.js';
+import { firstLanding, findRoute, stepFlight } from '../assets/cat-world.js';
 import { scanContour, contactAt, standingHeight } from '../assets/cat-surfaces.js';
 import { groundedPaw } from '../assets/cat-pose.js';
+
+test('ear launch keeps horizontal momentum beyond its old 650ms cutoff until landing', () => {
+  const floor = {id:'home',left:0,right:1000,y:400};
+  const bounds = {left:40,right:960};
+  for (const direction of [-1,1]) {
+    let state = {x:500,y:100,vx:direction*150,vy:-130};
+    state = stepFlight([floor],state,.65,bounds);
+    assert.equal(state.surface,undefined);
+    assert.equal(state.vx,direction*150);
+    const x = state.x;
+    state = stepFlight([floor],state,.1,bounds);
+    assert(Math.abs(state.x-x-direction*15)<.001);
+    state = stepFlight([floor],state,1,bounds);
+    assert.equal(state.surface.id,'home');
+    assert.equal(state.y,400);
+  }
+});
+
+test('ear launch stops horizontally at the viewport edge and continues falling', () => {
+  const state = stepFlight([{id:'floor',left:0,right:500,y:1000}],
+    {x:450,y:100,vx:150,vy:50},.5,{left:40,right:460});
+  assert.equal(state.x,460);
+  assert.equal(state.vx,0);
+  assert(state.y>100);
+});
+
+test('ear launch passes through a ledge from below and catches it on descent', () => {
+  const ledge={id:'ledge',left:0,right:500,y:90};
+  const bounds={left:40,right:460};
+  let state=stepFlight([ledge],{x:150,y:100,vx:80,vy:-130},.2,bounds);
+  assert.equal(state.surface,undefined);
+  assert(state.y<90);
+  state=stepFlight([ledge],state,.3,bounds);
+  assert.equal(state.surface.id,'ledge');
+  assert.equal(state.y,90);
+});
 
 test('steep terrain never stretches a leg beyond its normal reach', () => {
   const root = {x:20, y:26};

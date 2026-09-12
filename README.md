@@ -23,10 +23,11 @@ contact adjustments are applied to that gait when walking over text or the avata
 Hold the cat over the portrait's face for four continuous seconds to fuse them.
 Moving within the face keeps the timer going; leaving or releasing resets it.
 Released cats fall onto separate eye, nose, mouth, hair, and shoulder contours,
-then return home without sticking to the face. The
+then stay on the portrait until picked up again. The
 cat fades away and the portrait gains independently twitching ears and curved
 whiskers that sway gently from their roots. Click either ear to release the cat;
-it jumps out beside the portrait and returns to its divider to sleep.
+it jumps out beside the portrait with continuous horizontal momentum until landing,
+then returns to its divider to sleep. Only the viewport edges stop a launch sideways.
 Reduced motion keeps the ears and whiskers still.
 
 Three photographs appear uncropped in a responsive gallery. Select a photograph

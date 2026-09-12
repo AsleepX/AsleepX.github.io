@@ -1,4 +1,4 @@
-import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight } from './cat-world.js?v=b59ebf21';
+import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight, stepFlight } from './cat-world.js?v=458b0b9c';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
 
@@ -175,6 +175,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
   let journeyFrame = 0;
   let holdTimer;
   let world = { x: 0, y: 0 }; // center of the paws in document coordinates
+  let parked = null;
   const footOffset = parseFloat(getComputedStyle(cat).getPropertyValue('--cat-ground-offset')) || 39;
   const halfWidth = 28;
   const portrait = document.querySelector('.portrait');
@@ -235,16 +236,31 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     const direction = side === 'left' ? -1 : 1;
     cat.style.setProperty('--cat-direction', String(direction));
     const start = {x:r.left + scrollX + r.width * (side === 'left' ? .3 : .7), y:r.top + scrollY + r.height * .25};
-    const end = {x:clamp(start.x + direction * 76, 40, document.documentElement.clientWidth - 40), y:start.y + r.height * .3};
     moveWorld(start.x, start.y);
     if (keyboard) cat.focus({preventScroll:true});
-    if (!await frameSequence(reducedMotion.matches ? 100 : 650, t => {
-      moveWorld(start.x + (end.x - start.x) * t, start.y + (end.y - start.y) * t - 80 * t * (1 - t));
-      rig.setAttribute('transform', `translate(32 25) scale(${.45 + .55 * phase(t, 0, .6)}) translate(-32 -25)`);
-    }, token)) return;
+    const platforms = collectPlatforms(track);
+    const bounds = {left:40, right:document.documentElement.clientWidth - 40};
+    let flight = {...start, vx:direction * 150, vy:-130};
+    let previousTime = performance.now(), elapsed = 0;
+    const landed = await new Promise(resolve => {
+      function tick(now) {
+        if (token !== journey) { resolve(null); return; }
+        const dt = reducedMotion.matches ? .1 : Math.min(.05, (now - previousTime) / 1000);
+        previousTime = now;
+        elapsed += dt;
+        flight = stepFlight(platforms, flight, dt, bounds);
+        moveWorld(flight.x, flight.y);
+        const scale = reducedMotion.matches ? 1 : .45 + .55 * phase(elapsed, 0, .3);
+        rig.setAttribute('transform', `translate(32 25) scale(${scale}) translate(-32 -25)`);
+        if (flight.surface) { journeyFrame = 0; resolve(flight.surface); }
+        else journeyFrame = requestAnimationFrame(tick);
+      }
+      journeyFrame = requestAnimationFrame(tick);
+    });
+    if (!landed || token !== journey) return;
     rig.removeAttribute('transform');
     cat.classList.remove('is-jumping');
-    landAndReturn();
+    landAndReturn({landedSurface:landed});
   }
   earButtons.forEach(button => button.addEventListener('click', event => {
     releaseFromPortrait(button.dataset.side, event.detail === 0);
@@ -323,6 +339,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     return transform;
   }
   function cancelJourney() {
+    parked = null;
     journey++;
     cancelAnimationFrame(journeyFrame);
     journeyFrame = 0;
@@ -445,19 +462,19 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     moveWorld(clamp(drag.clientX + scrollX - drag.offset.x + halfWidth, 40, document.documentElement.clientWidth - 40),
       Math.max(footOffset, drag.clientY + scrollY - drag.offset.y + footOffset));
   }, {passive:true});
-  async function landAndReturn() {
+  async function landAndReturn({stayOnPortrait = false, landedSurface = null} = {}) {
     const token = journey;
     pose(1);
     rig.removeAttribute('transform');
     cat.classList.remove('is-held');
     cat.removeAttribute('data-grab');
     let platforms = collectPlatforms(track);
-    let surface = firstLanding(platforms, world.x, world.y);
+    let surface = landedSurface || firstLanding(platforms, world.x, world.y);
     if (!surface) surface = platforms.find(p => p.id === 'floor');
     const start = { ...world };
     const distance = Math.max(0, surface.y - start.y);
     cat.classList.add('is-jumping');
-    if (!await frameSequence(reducedMotion.matches ? 100 : Math.max(160, Math.sqrt(2 * distance / 1100) * 1000), t => {
+    if (!landedSurface && !await frameSequence(reducedMotion.matches ? 100 : Math.max(160, Math.sqrt(2 * distance / 1100) * 1000), t => {
       moveWorld(start.x, start.y + distance * t * t);
     }, token)) return;
     cat.classList.remove('is-jumping');
@@ -470,6 +487,11 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     }, token)) return;
     cat.classList.remove('is-looking');
     pose(1);
+    if (stayOnPortrait && (surface.id === 'portrait' || surface.id.startsWith('portrait-'))) {
+      standOn(surface, start.x);
+      parked = {id:surface.id, fraction:(start.x - surface.left) / Math.max(1, surface.right - surface.left)};
+      return;
+    }
     platforms = collectPlatforms(track);
     const home = homePoint();
     const route = findRoute(platforms, { ...world, platform: surface.id }, home.x);
@@ -531,7 +553,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     if (canceled) { if (active) restoreHome(); }
     else if (active) {
       stopFusionWatch();
-      landAndReturn();
+      landAndReturn({stayOnPortrait:true});
     }
     // The click immediately following pointerup must not wake a just-dropped cat.
     setTimeout(() => { suppressClick = false; }, 0);
@@ -541,6 +563,13 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
   cat.addEventListener('keydown', event => { if (event.key === 'Escape' && roaming) { release(null, true); restoreHome(); } });
   function terrainChanged() {
     if (!roaming || drag || fused) return;
+    if (parked) {
+      const surface = collectPlatforms(track).find(p => p.id === parked.id);
+      if (surface) {
+        standOn(surface, surface.left + parked.fraction * (surface.right - surface.left));
+        return;
+      }
+    }
     cancelJourney();
     busy = true;
     cat.classList.remove('is-looking', 'is-jumping', 'is-landing', 'is-grounded');
@@ -563,10 +592,11 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
   document.querySelector('.portrait-fallback')?.addEventListener('load', terrainChanged);
   document.querySelectorAll('.photo-gallery img').forEach(image => image.addEventListener('load', terrainChanged));
   window.addEventListener('resize', () => {
-    if (roaming) restoreHome(); else { sleep(); place(position); }
+    if (parked) terrainChanged();
+    else if (roaming) restoreHome(); else { sleep(); place(position); }
   }, { passive: true });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) { if (roaming) restoreHome(); else sleep(); }
+    if (document.hidden && !parked) { if (roaming) restoreHome(); else sleep(); }
   });
   window.addEventListener('blur', () => { if (drag) restoreHome(); });
   reducedMotion.addEventListener('change', () => { if (roaming) restoreHome(); else sleep(); });

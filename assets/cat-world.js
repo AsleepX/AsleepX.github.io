@@ -57,6 +57,25 @@ export function firstLanding(platforms, x, feetY) {
     .filter(p => Number.isFinite(p.y) && p.y >= feetY - 1)
     .sort((a, b) => a.y - b.y)[0];
 }
+// Integrate the whole launch, including its fall. Only real page edges stop x.
+export function stepFlight(platforms, state, seconds, bounds) {
+  let next = { ...state };
+  const steps = Math.max(1, Math.ceil(seconds * 240));
+  const dt = seconds / steps;
+  for (let i = 0; i < steps; i++) {
+    const previous = next;
+    const x = clamp(previous.x + previous.vx * dt, bounds.left, bounds.right);
+    next = { x, y: previous.y + previous.vy * dt + 325 * dt * dt,
+      vx: x === previous.x ? 0 : previous.vx, vy: previous.vy + 650 * dt };
+    if (next.y <= previous.y) continue;
+    const hit = platforms.filter(p => x >= p.left && x <= p.right)
+      .map(p => ({ ...p, y: standingHeight(p, x) }))
+      .filter(p => Number.isFinite(p.y) && previous.y <= p.y && next.y >= p.y)
+      .sort((a, b) => a.y - b.y)[0];
+    if (hit) return { ...next, y: hit.y, surface: hit };
+  }
+  return next;
+}
 const arcPoint = (a, b, t) => ({
   x: a.x + (b.x - a.x) * t,
   y: a.y + (b.y - a.y) * t - 4 * jumpHeight(a, b) * t * (1 - t),
