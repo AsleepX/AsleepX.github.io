@@ -1,4 +1,12 @@
 // Collision data comes from rasterized ink, not line boxes or image rectangles.
+export const portraitRegions = [
+  {id:'left-eye',left:.30,right:.425,top:.415,bottom:.493},
+  {id:'right-eye',left:.52,right:.65,top:.403,bottom:.485},
+  {id:'nose',left:.44,right:.49,top:.50,bottom:.56},
+  {id:'mouth',left:.44,right:.54,top:.585,bottom:.615},
+  {id:'left-shoulder',left:.17,right:.43,top:.74,bottom:.95},
+  {id:'right-shoulder',left:.63,right:.85,top:.74,bottom:.95},
+];
 export function scanContour(data, width, height, scale, left, top, dark = false, bounds = null) {
   const xStart = Math.max(0, Math.floor(bounds?.left ?? 0));
   const xEnd = Math.min(width, Math.ceil(bounds?.right ?? width));

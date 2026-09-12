@@ -11,11 +11,11 @@ export function overFace(cat, portrait) {
   return x * x + y * y <= 1;
 }
 
-// Motion inside the face does not reset the dwell; leaving it does.
+// Fusion requires one continuous hold; leaving or releasing resets the dwell.
 export function fusionDwell() {
   let entered = null;
-  return (inside, now) => {
-    if (!inside) entered = null;
+  return (inside, now, held) => {
+    if (!inside || !held) entered = null;
     else if (entered === null) entered = now;
     return entered !== null && now - entered >= FUSION_DELAY;
   };
