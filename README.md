@@ -21,9 +21,10 @@ On steep contours, unreachable paws release into a hanging pose instead of stret
 Click-to-walk and drag-return share the same leg swing and body motion; contour
 contact adjustments are applied to that gait when walking over text or the avatar.
 Hold the cat over the portrait's face for four continuous seconds to fuse them.
-Moving within the face keeps the timer going; leaving or releasing resets it.
-Released cats fall onto separate eye, nose, mouth, hair, and shoulder contours,
-then stay on the portrait until picked up again. The
+Moving within the face keeps the timer going; leaving or releasing resets that hold.
+Cats manually dropped onto an eye, the nose, or the mouth stay there and fuse after
+four seconds on the feature. Picking them up resets this timer. Hair and shoulders
+remain ordinary surfaces: a cat dropped there looks around and returns home. The
 cat fades away and the portrait gains independently twitching ears and curved
 whiskers that sway gently from their roots. Click either ear to release the cat;
 it jumps out beside the portrait with continuous horizontal momentum until landing,

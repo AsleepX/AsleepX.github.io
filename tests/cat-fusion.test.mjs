@@ -1,6 +1,31 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { fusionDwell, overFace } from '../assets/cat-fusion.js';
+import { fusionDwell, overFace, isFaceSurface } from '../assets/cat-fusion.js';
+
+test('only facial features retain a manually dropped cat for fusion', () => {
+  for (const feature of ['left-eye','right-eye','nose','mouth']) {
+    assert.equal(isFaceSurface('portrait-'+feature),true);
+  }
+  for (const id of ['portrait','portrait-left-shoulder','portrait-right-shoulder','home',undefined]) {
+    assert.equal(isFaceSurface(id),false);
+  }
+});
+
+test('landing on a facial feature starts a fresh four-second fusion timer', () => {
+  const dwell=fusionDwell();
+  assert.equal(dwell(true,0,true),false);
+  assert.equal(dwell(true,2000,false),false); // Released; the cat is still falling.
+  assert.equal(dwell(true,2300,isFaceSurface('portrait-nose')),false);
+  assert.equal(dwell(true,6299,true),false);
+  assert.equal(dwell(true,6300,true),true);
+});
+
+test('holding over the crown or forehead does not start face fusion', () => {
+  const portrait={left:100,top:100,width:200,height:200};
+  for (const centerY of [.08,.2,.28]) {
+    assert.equal(overFace({left:170,top:100+200*centerY-22,width:56,height:44},portrait),false);
+  }
+});
 
 test('a shoulder drop does not trigger face fusion', () => {
   const portrait={left:100,top:100,width:200,height:200};

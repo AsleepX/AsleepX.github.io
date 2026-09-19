@@ -1,6 +1,6 @@
 import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight, stepFlight } from './cat-world.js?v=458b0b9c';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
-import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
+import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834';
 
 (() => {
   const cat = document.querySelector('.cat');
@@ -185,13 +185,14 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
   let fusionAnimation = null;
   const earButtons = [...document.querySelectorAll('.cat-ear-button')];
   const isOverFace = () => portrait && overFace(cat.getBoundingClientRect(), portrait.getBoundingClientRect());
+  const restingOnFace = () => isFaceSurface(parked?.id);
   function stopFusionWatch() {
     cancelAnimationFrame(fusionFrame);
     fusionFrame = 0;
     dwell(false, performance.now(), false);
   }
   function fuseWithPortrait() {
-    if (!drag?.active) return;
+    if (fused || !(drag?.active || restingOnFace())) return;
     fused = true;
     stopFusionWatch();
     clearTimeout(holdTimer);
@@ -205,7 +206,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     busy = true;
     pose(1);
     rig.removeAttribute('transform');
-    cat.classList.remove('is-held', 'is-looking', 'is-running', 'is-jumping');
+    cat.classList.remove('is-held', 'is-looking', 'is-running', 'is-jumping', 'is-grounded');
     cat.classList.add('is-fusing');
     portrait.classList.add('is-cat');
     earButtons.forEach(button => { button.hidden = false; });
@@ -270,7 +271,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     let previousTime = performance.now();
     function tick(now) {
       fusionFrame = 0;
-      if (document.hidden || !roaming || !drag?.active) {
+      if (document.hidden || !roaming || !(drag?.active || restingOnFace())) {
         stopFusionWatch();
         return;
       }
@@ -282,8 +283,8 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
         if (delta) window.scrollBy(0, delta);
       }
       previousTime = now;
-      const inside = isOverFace();
-      if (dwell(inside, now, drag.active)) { fuseWithPortrait(); return; }
+      const inside = restingOnFace() || isOverFace();
+      if (dwell(inside, now, drag?.active || restingOnFace())) { fuseWithPortrait(); return; }
       fusionFrame = requestAnimationFrame(tick);
     }
     fusionFrame = requestAnimationFrame(tick);
@@ -339,6 +340,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     return transform;
   }
   function cancelJourney() {
+    stopFusionWatch();
     parked = null;
     journey++;
     cancelAnimationFrame(journeyFrame);
@@ -462,7 +464,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     moveWorld(clamp(drag.clientX + scrollX - drag.offset.x + halfWidth, 40, document.documentElement.clientWidth - 40),
       Math.max(footOffset, drag.clientY + scrollY - drag.offset.y + footOffset));
   }, {passive:true});
-  async function landAndReturn({stayOnPortrait = false, landedSurface = null} = {}) {
+  async function landAndReturn({stayOnFace = false, landedSurface = null} = {}) {
     const token = journey;
     pose(1);
     rig.removeAttribute('transform');
@@ -479,6 +481,10 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     }, token)) return;
     cat.classList.remove('is-jumping');
     standOn(surface, start.x);
+    if (stayOnFace && isFaceSurface(surface.id)) {
+      parked = {id:surface.id, fraction:(start.x - surface.left) / Math.max(1, surface.right - surface.left)};
+      watchFace();
+    }
     cat.classList.add('is-looking');
     if (!await frameSequence(reducedMotion.matches ? 100 : 1250, t => {
       const angle = Math.sin(t * Math.PI * 3) * 11;
@@ -487,9 +493,8 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     }, token)) return;
     cat.classList.remove('is-looking');
     pose(1);
-    if (stayOnPortrait && (surface.id === 'portrait' || surface.id.startsWith('portrait-'))) {
+    if (restingOnFace()) {
       standOn(surface, start.x);
-      parked = {id:surface.id, fraction:(start.x - surface.left) / Math.max(1, surface.right - surface.left)};
       return;
     }
     platforms = collectPlatforms(track);
@@ -553,7 +558,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
     if (canceled) { if (active) restoreHome(); }
     else if (active) {
       stopFusionWatch();
-      landAndReturn({stayOnPortrait:true});
+      landAndReturn({stayOnFace:true});
     }
     // The click immediately following pointerup must not wake a just-dropped cat.
     setTimeout(() => { suppressClick = false; }, 0);
@@ -597,6 +602,7 @@ import { overFace, fusionDwell } from './cat-fusion.js?v=6a727ae6';
   }, { passive: true });
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && !parked) { if (roaming) restoreHome(); else sleep(); }
+    else if (!document.hidden && restingOnFace()) watchFace();
   });
   window.addEventListener('blur', () => { if (drag) restoreHome(); });
   reducedMotion.addEventListener('change', () => { if (roaming) restoreHome(); else sleep(); });
