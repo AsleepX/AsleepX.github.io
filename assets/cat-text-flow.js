@@ -20,17 +20,31 @@ function catIntervals(glyph, obstacle) {
   return intervals;
 }
 
-const intersects = (glyph, interval, dy = 0) => glyph.bottom + dy > interval[0] + .01 && glyph.top + dy < interval[1] - .01;
-
 export function glyphOffsets(glyphs, obstacle, minY = -Infinity) {
-  const bands = glyphs.map(glyph => catIntervals(glyph, obstacle));
-  const touched = bands.map((intervals, i) => intervals.some(band => intersects(glyphs[i], band)));
-  const occupied = glyphs.filter((_,i) => !touched[i]);
-  return glyphs.map((glyph, i) => {
-    if (!touched[i]) return 0;
-    const intervals = [...bands[i]];
-    for (const other of occupied) {
-      if (glyph.left < other.right && glyph.right > other.left) intervals.push([other.top - 1, other.bottom + 1]);
+  return glyphs.map(glyph => {
+    if (!obstacle || glyph.right < obstacle.left - 2 || glyph.left > obstacle.right + 2 ||
+        glyph.bottom < obstacle.top - 2 || glyph.top > obstacle.bottom + 2) return 0;
+    const intervals = [];
+    if (glyph.ink && obstacle.columns) {
+      // Each interval is a forbidden vertical displacement between actual ink
+      // runs. Counters (such as the hole in o) and serif whitespace stay empty.
+      const {scale, padding = 2} = obstacle;
+      glyph.ink.columns.forEach((runs, x) => {
+        if (!runs.length) return;
+        const worldX = glyph.left + (x + .5) / glyph.ink.scale;
+        const first = Math.max(0, Math.floor((worldX - obstacle.left - padding) * scale));
+        const last = Math.min(obstacle.columns.length - 1, Math.ceil((worldX - obstacle.left + padding) * scale));
+        for (let column = first; column <= last; column++) {
+          for (const [catTop, catBottom] of obstacle.columns[column]) {
+            for (const [top,bottom] of runs) intervals.push([
+              obstacle.top + catTop/scale - padding - glyph.top - bottom/glyph.ink.scale,
+              obstacle.top + catBottom/scale + padding - glyph.top - top/glyph.ink.scale,
+            ]);
+          }
+        }
+      });
+    } else {
+      for (const [top,bottom] of catIntervals(glyph, obstacle)) intervals.push([top - glyph.bottom,bottom - glyph.top]);
     }
     intervals.sort((a,b) => a[0] - b[0]);
     const merged = [];
@@ -39,12 +53,37 @@ export function glyphOffsets(glyphs, obstacle, minY = -Infinity) {
       if (previous && interval[0] <= previous[1]) previous[1] = Math.max(previous[1], interval[1]);
       else merged.push([...interval]);
     }
-    const candidates = merged.flatMap(([top,bottom]) => [top - glyph.bottom, bottom - glyph.top])
+    if (!merged.some(([top,bottom]) => top < -.01 && bottom > .01)) return 0;
+    const candidates = merged.flat()
       .filter(dy => glyph.top + dy >= minY)
       .sort((a,b) => Math.abs(a) - Math.abs(b) || a - b);
-    const dy = candidates.find(value => !merged.some(band => intersects(glyph, band, value))) ?? 0;
-    occupied.push({...glyph, top:glyph.top + dy, bottom:glyph.bottom + dy});
-    return dy;
+    // Other letters are deliberately not obstacles: neighboring rows may
+    // overlap temporarily, rather than forcing a letter to leap over a line.
+    return candidates.find(value => !merged.some(([top,bottom]) => value > top + .01 && value < bottom - .01)) ?? 0;
+  });
+}
+
+export function springStep(position, velocity, target, dt) {
+  // Exact critically damped spring; stable across refresh rates, no bouncing.
+  const omega = target === 0 ? 12 : 18;
+  const error = position - target, impulse = velocity + omega * error;
+  const decay = Math.exp(-omega * dt);
+  return {position:target + (error + impulse * dt) * decay,
+    velocity:(velocity - omega * impulse * dt) * decay};
+}
+
+function inkColumns(canvas) {
+  const {width,height} = canvas;
+  const data = canvas.getContext('2d').getImageData(0,0,width,height).data;
+  return Array.from({length:width}, (_,x) => {
+    const runs = [];
+    let start = -1;
+    for (let y=0;y<=height;y++) {
+      const filled = y < height && data[(y*width+x)*4+3] > 40;
+      if (filled && start < 0) start = y;
+      else if (!filled && start >= 0) { runs.push([start,y]); start = -1; }
+    }
+    return runs;
   });
 }
 
@@ -80,12 +119,14 @@ function silhouette(rig) {
     }
     rows.push(runs);
   }
-  return {rows, scale, margin, width:canvas.width/scale, height:canvas.height/scale, padding:2};
+  return {rows, columns:inkColumns(canvas), scale, margin, width:canvas.width/scale, height:canvas.height/scale, padding:2};
 }
 
 export function createCatTextFlow(rig) {
   let active = false, dirty = false, frame = 0, entries = [];
   let layer = null, mask = null;
+  let previousTime = 0;
+  const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
   const page = document.querySelector('.page');
   const changed = new MutationObserver(records => {
     if (active && records.some(record => {
@@ -139,6 +180,17 @@ export function createCatTextFlow(rig) {
             metrics = {width:measureNaturalWidth(prepared), left:ink.actualBoundingBoxLeft, right:ink.actualBoundingBoxRight,
               ascent:ink.actualBoundingBoxAscent, descent:ink.actualBoundingBoxDescent,
               fontAscent:ink.fontBoundingBoxAscent ?? fontSize*.8, fontDescent:ink.fontBoundingBoxDescent ?? fontSize*.2};
+            const scale = 2;
+            const left = Math.floor(-metrics.left) - 1, top = Math.floor(-metrics.ascent) - 1;
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1,Math.ceil((metrics.right - left + 1) * scale));
+            canvas.height = Math.max(1,Math.ceil((metrics.descent - top + 1) * scale));
+            const paint = canvas.getContext('2d');
+            paint.scale(scale,scale); paint.font = font;
+            paint.fillText(text,-left,-top);
+            metrics.ink = {columns:inkColumns(canvas),scale};
+            metrics.inkLeft = left; metrics.inkTop = top;
+            metrics.inkWidth = canvas.width/scale; metrics.inkHeight = canvas.height/scale;
             metricsCache.set(key,metrics);
           }
           const x = anchor.left - rect.left;
@@ -148,8 +200,9 @@ export function createCatTextFlow(rig) {
           span.textContent = text;
           span.style.width = `${metrics.width}px`;
           host.append(span);
-          glyphs.push({span,x,y,left:x - metrics.left,right:x + metrics.right,
-            top:baseline - metrics.ascent,bottom:baseline + metrics.descent});
+          glyphs.push({span,x,y,left:x + metrics.inkLeft,right:x + metrics.inkLeft + metrics.inkWidth,
+            top:baseline + metrics.inkTop,bottom:baseline + metrics.inkTop + metrics.inkHeight,
+            ink:metrics.ink,position:0,velocity:0});
         }
       }
       host.hidden = true;
@@ -158,43 +211,57 @@ export function createCatTextFlow(rig) {
     dirty = false;
   }
 
-  function render() {
-    if (!active) return;
+  function render(now) {
+    if (!layer) return;
+    const dt = Math.min(.05,Math.max(0,(now - previousTime)/1000));
+    previousTime = now;
     // Pretext measures each grapheme once. DOM ranges preserve the original
     // kerning and line anchors; moving the cat never recalculates paragraph flow.
     if (dirty) measure();
     const catRect = rig.getBoundingClientRect();
-    const obstacle = {...mask, left:catRect.left - mask.margin, right:catRect.left - mask.margin + mask.width,
-      top:catRect.top - mask.margin, bottom:catRect.top - mask.margin + mask.height};
+    const obstacle = active ? {...mask, left:catRect.left - mask.margin, right:catRect.left - mask.margin + mask.width,
+      top:catRect.top - mask.margin, bottom:catRect.top - mask.margin + mask.height} : null;
     const boxes = entries.map(entry => entry.element.getBoundingClientRect());
     const letters = entries.flatMap((entry,i) => entry.glyphs.map(glyph => ({
       left:boxes[i].left + glyph.left, right:boxes[i].left + glyph.right,
       top:boxes[i].top + glyph.top, bottom:boxes[i].top + glyph.bottom,
+      ink:glyph.ink,
     })));
     const offsets = glyphOffsets(letters, obstacle, 2 - scrollY);
     let letterIndex = 0;
+    let moving = false;
     entries.forEach((entry, index) => {
       const {element, host, glyphs, id} = entry;
       const box = boxes[index];
       const movements = offsets.slice(letterIndex,letterIndex + glyphs.length);
       letterIndex += glyphs.length;
-      if (!movements.some(dy => dy !== 0)) {
+      glyphs.forEach((glyph,i) => {
+        const target = movements[i];
+        const next = reducedMotion.matches ? {position:target,velocity:0} : springStep(glyph.position,glyph.velocity,target,dt);
+        if (Math.abs(next.position - target) < .02 && Math.abs(next.velocity) < .1) {
+          next.position = target; next.velocity = 0;
+        }
+        Object.assign(glyph,next);
+      });
+      if (!glyphs.some(glyph => glyph.position !== 0 || glyph.velocity !== 0)) {
         element.removeAttribute('data-cat-flow-source');
         host.hidden = true;
         return;
       }
+      moving = true;
       element.setAttribute('data-cat-flow-source', String(id));
       host.hidden = false;
       host.style.transform = `translate(${box.left + scrollX}px, ${box.top + scrollY}px)`;
-      glyphs.forEach((glyph, i) => {
-        glyph.span.style.transform = `translate(${glyph.x}px, ${glyph.y + movements[i]}px)`;
+      glyphs.forEach(glyph => {
+        glyph.span.style.transform = `translate(${glyph.x}px, ${glyph.y + glyph.position}px)`;
       });
     });
+    if (!active && !moving) { stop(); return; }
     frame = requestAnimationFrame(tick);
   }
 
-  function tick() {
-    try { render(); } catch (error) { stop(); console.warn('Cat text flow unavailable:', error); }
+  function tick(now) {
+    try { render(now); } catch (error) { stop(); console.warn('Cat text flow unavailable:', error); }
   }
 
   function stop() {
@@ -216,10 +283,12 @@ export function createCatTextFlow(rig) {
       document.body.append(layer);
       try { mask = silhouette(rig); measure(); } catch (error) { stop(); console.warn('Cat text flow unavailable:', error); return; }
       active = true;
+      previousTime = performance.now();
       changed.observe(page, {subtree:true, childList:true, characterData:true,
         attributes:true, attributeFilter:['style','class']});
       frame = requestAnimationFrame(tick);
     },
+    release() { active = false; changed.disconnect(); },
     stop,
     invalidate() { clearCache(); if (active) dirty = true; },
   };

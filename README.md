@@ -18,13 +18,14 @@ follow the dark silhouette. Paws find separate contact points and the body follo
 the slope. Sampling reads current content, font metrics, and wrapping on each drop;
 text edits and font loading refresh an active journey automatically.
 While dragging, Pretext measures individual graphemes, each anchored to its original
-rendered position. Only letters intersecting the held cat move vertically around
-its silhouette, with a 2px clearance; untouched letters, words, line breaks, and
-page geometry stay fixed. Letters already passed by the cat immediately return
-to their anchors. Moved letters also avoid surrounding text without pushing it.
-Temporary text layers preserve the original DOM nodes. Releasing,
-canceling, or fusing removes these layers synchronously before landing and route
-sampling, so walking cats never push text. Content edits and newly loaded fonts
+rendered position. Actual rasterized letter strokes collide with the held cat's
+silhouette, with a 2px clearance; counters and empty serif corners stay empty.
+Only touched letters move, with a critically damped spring for displacement and
+return. Neighboring rows may overlap temporarily instead of blocking each other.
+Untouched letters, line breaks and page geometry stay fixed. On release the visual
+overlay eases home while collision and route sampling immediately use the original
+DOM geometry, so walking cats never push text. Canceling or fusing clears the layers
+immediately; reduced-motion preferences skip the spring. Content edits and newly loaded fonts
 refresh the drag layout. Pretext 0.0.9 is vendored locally in
 `assets/vendor/pretext-0.0.9/` with its MIT license and package integrity.
 On steep contours, unreachable paws release into a hanging pose instead of stretching.

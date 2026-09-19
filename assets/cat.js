@@ -1,7 +1,7 @@
 import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight, stepFlight } from './cat-world.js?v=458b0b9c';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834';
-import { createCatTextFlow } from './cat-text-flow.js?v=dcf4cc4b';
+import { createCatTextFlow } from './cat-text-flow.js?v=cbc9ea91';
 
 (() => {
   const cat = document.querySelector('.cat');
@@ -554,8 +554,9 @@ import { createCatTextFlow } from './cat-text-flow.js?v=dcf4cc4b';
   }
   function release(event, canceled = false) {
     if (!drag || (event && event.pointerId !== drag.pointerId)) return;
-    // Restore original text geometry before collision sampling or route planning.
-    textFlow.stop();
+    // Original DOM geometry stays fixed; only the visual overlay eases home.
+    // Pathfinding can sample the original letters immediately on release.
+    if (canceled) textFlow.stop(); else textFlow.release();
     clearTimeout(holdTimer);
     document.documentElement.classList.remove('cat-dragging');
     const active = drag.active;
@@ -571,7 +572,11 @@ import { createCatTextFlow } from './cat-text-flow.js?v=dcf4cc4b';
   }
   window.addEventListener('pointerup', event => release(event));
   window.addEventListener('pointercancel', event => release(event, true));
-  cat.addEventListener('keydown', event => { if (event.key === 'Escape' && roaming) { release(null, true); restoreHome(); } });
+  window.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && roaming && (drag || document.activeElement === cat)) {
+      release(null, true); restoreHome();
+    }
+  });
   function terrainChanged() {
     if (!roaming || drag || fused) return;
     if (parked) {
