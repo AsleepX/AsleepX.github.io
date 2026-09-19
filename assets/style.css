@@ -103,6 +103,12 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 
 .cat-dragging, .cat-dragging * { user-select: none !important; -webkit-user-select: none !important; }
 
+/* Drag-only Pretext rendering; original nodes stay intact for links and selection. */
+[data-cat-flow-source] { color: transparent !important; text-decoration-color: transparent !important; text-shadow: none !important; }
+.cat-text-flow { position: absolute; top: 0; left: 0; width: 100%; height: 0; pointer-events: none; z-index: 10; }
+.cat-text-flow-block, .cat-text-flow-block > span { position: absolute; top: 0; left: 0; white-space: pre; }
+.cat-text-flow [hidden] { display: none; }
+
 .cat.is-grounded .cat-leg { animation: none; }
 
 .portrait-cat { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; transition: opacity 600ms ease; }

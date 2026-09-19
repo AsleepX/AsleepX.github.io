@@ -1,7 +1,7 @@
 # Zixuan Zhao — personal website
 
 A minimal English academic homepage, built with semantic HTML and responsive CSS.
-No external fonts, dependencies, or build step.
+No external font or CDN requests, and no build step.
 
 The avatar uses a small vanilla JavaScript animation and SVG facial layers:
 its eyes follow the pointer and it blinks naturally. After four seconds without
@@ -17,6 +17,15 @@ Text platforms sample the top ink contour of each rendered glyph; avatar platfor
 follow the dark silhouette. Paws find separate contact points and the body follows
 the slope. Sampling reads current content, font metrics, and wrapping on each drop;
 text edits and font loading refresh an active journey automatically.
+While dragging, Pretext lays out nearby text on either side of the held cat.
+Avoidance samples the actual SVG silhouette in its current grasp pose, with a
+2px clearance, against the text's ink bands rather than full line-height boxes.
+Temporary text layers preserve the original DOM nodes and authored line breaks;
+extra lines reserve space so following content does not overlap. Releasing,
+canceling, or fusing removes these layers synchronously before landing and route
+sampling, so walking cats never push text. Content edits and newly loaded fonts
+refresh the drag layout. Pretext 0.0.9 is vendored locally in
+`assets/vendor/pretext-0.0.9/` with its MIT license and package integrity.
 On steep contours, unreachable paws release into a hanging pose instead of stretching.
 Click-to-walk and drag-return share the same leg swing and body motion; contour
 contact adjustments are applied to that gait when walking over text or the avatar.

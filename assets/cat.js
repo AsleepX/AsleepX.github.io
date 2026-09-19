@@ -1,6 +1,7 @@
 import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight, stepFlight } from './cat-world.js?v=458b0b9c';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834';
+import { createCatTextFlow } from './cat-text-flow.js?v=e5bc68dd';
 
 (() => {
   const cat = document.querySelector('.cat');
@@ -167,6 +168,7 @@ import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834
   });
   // Drag/drop and platform navigation share the same rig and cancellation scope.
   const rig = cat.querySelector('.cat-rig');
+  const textFlow = createCatTextFlow(rig);
   const svg = cat.querySelector('svg');
   let drag = null;
   let roaming = false;
@@ -340,6 +342,7 @@ import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834
     return transform;
   }
   function cancelJourney() {
+    textFlow.stop();
     stopFusionWatch();
     parked = null;
     journey++;
@@ -435,6 +438,7 @@ import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834
     const facing = getComputedStyle(cat).getPropertyValue('--cat-direction').trim() === '-1' ? -1 : 1;
     drag.offset = { x: (facing < 0 ? 64 - pivot[0] : pivot[0]) * .875, y: pivot[1] * .875 + 2.75 };
     moveWorld(event.pageX - drag.offset.x + halfWidth, event.pageY - drag.offset.y + footOffset);
+    textFlow.start();
     watchFace();
   }
   cat.addEventListener('pointerdown', event => {
@@ -550,6 +554,8 @@ import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834
   }
   function release(event, canceled = false) {
     if (!drag || (event && event.pointerId !== drag.pointerId)) return;
+    // Restore original text geometry before collision sampling or route planning.
+    textFlow.stop();
     clearTimeout(holdTimer);
     document.documentElement.classList.remove('cat-dragging');
     const active = drag.active;
@@ -594,6 +600,7 @@ import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834
     subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['style', 'class'],
   });
   document.fonts?.addEventListener('loadingdone', terrainChanged);
+  document.fonts?.addEventListener('loadingdone', () => textFlow.invalidate());
   document.querySelector('.portrait-fallback')?.addEventListener('load', terrainChanged);
   document.querySelectorAll('.photo-gallery img').forEach(image => image.addEventListener('load', terrainChanged));
   window.addEventListener('resize', () => {
