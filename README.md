@@ -17,11 +17,12 @@ Text platforms sample the top ink contour of each rendered glyph; avatar platfor
 follow the dark silhouette. Paws find separate contact points and the body follows
 the slope. Sampling reads current content, font metrics, and wrapping on each drop;
 text edits and font loading refresh an active journey automatically.
-While dragging, Pretext lays out nearby text on either side of the held cat.
-Avoidance samples the actual SVG silhouette in its current grasp pose, with a
-2px clearance, against the text's ink bands rather than full line-height boxes.
-Temporary text layers preserve the original DOM nodes and authored line breaks;
-extra lines reserve space so following content does not overlap. Releasing,
+While dragging, Pretext measures individual graphemes, each anchored to its original
+rendered position. Only letters intersecting the held cat move vertically around
+its silhouette, with a 2px clearance; untouched letters, words, line breaks, and
+page geometry stay fixed. Letters already passed by the cat immediately return
+to their anchors. Moved letters also avoid surrounding text without pushing it.
+Temporary text layers preserve the original DOM nodes. Releasing,
 canceling, or fusing removes these layers synchronously before landing and route
 sampling, so walking cats never push text. Content edits and newly loaded fonts
 refresh the drag layout. Pretext 0.0.9 is vendored locally in

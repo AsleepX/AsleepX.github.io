@@ -1,7 +1,7 @@
 import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight, stepFlight } from './cat-world.js?v=458b0b9c';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834';
-import { createCatTextFlow } from './cat-text-flow.js?v=e5bc68dd';
+import { createCatTextFlow } from './cat-text-flow.js?v=dcf4cc4b';
 
 (() => {
   const cat = document.querySelector('.cat');

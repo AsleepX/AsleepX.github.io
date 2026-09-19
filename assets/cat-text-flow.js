@@ -1,53 +1,51 @@
-import { prepareWithSegments, layoutNextLine, clearCache } from './vendor/pretext-0.0.9/layout.js';
+import { prepareWithSegments, measureNaturalWidth, clearCache } from './vendor/pretext-0.0.9/layout.js';
 
 const targets = '.brand, nav a, #name, .bio, .info-row h2, .statement, .detail, .email, address, footer span';
 
-// Carve each text ink band against the silhouette, not the SVG bounding box.
-export function lineSlots(width, y, lineHeight, obstacle, minimum = 24) {
-  if (!obstacle || y + lineHeight <= obstacle.top || y >= obstacle.bottom ||
-      obstacle.right <= 0 || obstacle.left >= width) return [{x:0, width}];
+// Anchors never move: only letters whose ORIGINAL ink touches the cat can move.
+function catIntervals(glyph, obstacle) {
+  if (!obstacle || glyph.right <= obstacle.left || glyph.left >= obstacle.right) return [];
   const intervals = [];
   if (obstacle.rows) {
     const {scale, padding = 2} = obstacle;
-    const first = Math.max(0, Math.floor((y - obstacle.top - padding) * scale));
-    const last = Math.min(obstacle.rows.length - 1, Math.ceil((y + lineHeight - obstacle.top + padding) * scale) - 1);
-    for (let row = first; row <= last; row++) {
+    for (let row = 0; row < obstacle.rows.length; row++) {
       for (const [left, right] of obstacle.rows[row]) {
-        intervals.push([obstacle.left + left / scale - padding, obstacle.left + right / scale + padding]);
+        if (glyph.right > obstacle.left + left / scale - padding && glyph.left < obstacle.left + right / scale + padding) {
+          intervals.push([obstacle.top + row / scale - padding, obstacle.top + (row + 1) / scale + padding]);
+          break;
+        }
       }
     }
-  } else intervals.push([obstacle.left, obstacle.right]);
-  intervals.sort((a,b) => a[0] - b[0]);
-  const slots = [];
-  let x = 0;
-  for (const [left, right] of intervals) {
-    const edge = Math.max(0, Math.min(width, left));
-    if (edge > x) slots.push({x, width:edge - x});
-    x = Math.max(x, Math.min(width, right));
-  }
-  if (x < width) slots.push({x, width:width - x});
-  return slots.filter(slot => slot.width >= Math.min(minimum, width));
+  } else intervals.push([obstacle.top, obstacle.bottom]);
+  return intervals;
 }
 
-export function flowLines(paragraphs, width, lineHeight, obstacle, minimum, ink = {top:0,bottom:lineHeight}) {
-  const lines = [];
-  let y = 0;
-  for (const prepared of paragraphs) {
-    let cursor = {segmentIndex:0, graphemeIndex:0};
-    let done = false;
-    while (!done) {
-      const slots = lineSlots(width, y + ink.top, ink.bottom - ink.top, obstacle, minimum);
-      for (const slot of slots) {
-        const line = layoutNextLine(prepared, cursor, slot.width);
-        if (!line) { done = true; break; }
-        lines.push({text:line.text, x:slot.x, y, width:line.width});
-        cursor = line.end;
-        if (!layoutNextLine(prepared, cursor, width)) { done = true; break; }
-      }
-      y += lineHeight;
+const intersects = (glyph, interval, dy = 0) => glyph.bottom + dy > interval[0] + .01 && glyph.top + dy < interval[1] - .01;
+
+export function glyphOffsets(glyphs, obstacle, minY = -Infinity) {
+  const bands = glyphs.map(glyph => catIntervals(glyph, obstacle));
+  const touched = bands.map((intervals, i) => intervals.some(band => intersects(glyphs[i], band)));
+  const occupied = glyphs.filter((_,i) => !touched[i]);
+  return glyphs.map((glyph, i) => {
+    if (!touched[i]) return 0;
+    const intervals = [...bands[i]];
+    for (const other of occupied) {
+      if (glyph.left < other.right && glyph.right > other.left) intervals.push([other.top - 1, other.bottom + 1]);
     }
-  }
-  return {lines, height:y};
+    intervals.sort((a,b) => a[0] - b[0]);
+    const merged = [];
+    for (const interval of intervals) {
+      const previous = merged.at(-1);
+      if (previous && interval[0] <= previous[1]) previous[1] = Math.max(previous[1], interval[1]);
+      else merged.push([...interval]);
+    }
+    const candidates = merged.flatMap(([top,bottom]) => [top - glyph.bottom, bottom - glyph.top])
+      .filter(dy => glyph.top + dy >= minY)
+      .sort((a,b) => Math.abs(a) - Math.abs(b) || a - b);
+    const dy = candidates.find(value => !merged.some(band => intersects(glyph, band, value))) ?? 0;
+    occupied.push({...glyph, top:glyph.top + dy, bottom:glyph.bottom + dy});
+    return dy;
+  });
 }
 
 function silhouette(rig) {
@@ -85,16 +83,9 @@ function silhouette(rig) {
   return {rows, scale, margin, width:canvas.width/scale, height:canvas.height/scale, padding:2};
 }
 
-function textLines(element) {
-  // Preserve authored <br> boundaries and collapse HTML indentation separately.
-  const clone = element.cloneNode(true);
-  clone.querySelectorAll('br').forEach(br => br.replaceWith('\u0000'));
-  return clone.textContent.split('\u0000').map(s => s.replace(/\s+/g, ' ').trim()).filter(Boolean);
-}
-
 export function createCatTextFlow(rig) {
   let active = false, dirty = false, frame = 0, entries = [];
-  let layer = null, rules = null, mask = null;
+  let layer = null, mask = null;
   const page = document.querySelector('.page');
   const changed = new MutationObserver(records => {
     if (active && records.some(record => {
@@ -108,82 +99,97 @@ export function createCatTextFlow(rig) {
 
   function clearSources() {
     entries.forEach(({element}) => element.removeAttribute('data-cat-flow-source'));
-    if (rules) rules.textContent = '';
     if (layer) layer.replaceChildren();
     entries = [];
   }
 
   function measure() {
     clearSources();
+    const segmenter = new Intl.Segmenter(document.documentElement.lang || 'en', {granularity:'grapheme'});
+    const metricsCache = new Map();
     entries = [...page.querySelectorAll(targets)].map((element, id) => {
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
       const fontSize = parseFloat(style.fontSize);
       const lineHeight = parseFloat(style.lineHeight) || fontSize * 1.2;
       const font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
-      const inset = side => (parseFloat(style[`padding${side}`]) || 0) + (parseFloat(style[`border${side}Width`]) || 0);
-      const texts = textLines(element).map(text => style.textTransform === 'uppercase' ? text.toUpperCase() : text);
       const ctx = document.createElement('canvas').getContext('2d');
       ctx.font = font;
-      const metrics = ctx.measureText(texts.join(' '));
-      const ascent = metrics.fontBoundingBoxAscent ?? fontSize * .8;
-      const descent = metrics.fontBoundingBoxDescent ?? fontSize * .2;
-      const baseline = (lineHeight - ascent - descent) / 2 + ascent;
-      const ink = {top:baseline - metrics.actualBoundingBoxAscent, bottom:baseline + metrics.actualBoundingBoxDescent};
-      const paragraphs = texts.map(text => prepareWithSegments(text, font, {letterSpacing:parseFloat(style.letterSpacing) || 0}));
       const host = document.createElement('div');
       host.className = 'cat-text-flow-block';
       Object.assign(host.style, {font, lineHeight:`${lineHeight}px`, letterSpacing:style.letterSpacing,
-        color:style.color, textDecoration:style.textDecoration, fontKerning:style.fontKerning});
+        color:style.color, textDecoration:style.textDecoration, fontKerning:style.fontKerning, fontVariantLigatures:'none'});
       layer.append(host);
-      return {element, id, host, paragraphs, lineHeight, fontSize, ink, pool:[],
-        inline:style.display === 'inline', baseHeight:rect.height,
-        top:inset('Top'), bottom:inset('Bottom'), left:inset('Left'), right:inset('Right')};
+      const glyphs = [];
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+      const range = document.createRange();
+      let node;
+      while ((node = walker.nextNode())) {
+        for (const {segment,index} of segmenter.segment(node.textContent)) {
+          if (!segment.trim()) continue;
+          range.setStart(node,index); range.setEnd(node,index + segment.length);
+          const anchor = range.getBoundingClientRect();
+          if (!anchor.width || !anchor.height) continue;
+          const text = style.textTransform === 'uppercase' ? segment.toUpperCase() : segment;
+          const key = `${font}|${style.letterSpacing}|${text}`;
+          let metrics = metricsCache.get(key);
+          if (!metrics) {
+            const prepared = prepareWithSegments(text,font,{letterSpacing:parseFloat(style.letterSpacing) || 0});
+            const ink = ctx.measureText(text);
+            metrics = {width:measureNaturalWidth(prepared), left:ink.actualBoundingBoxLeft, right:ink.actualBoundingBoxRight,
+              ascent:ink.actualBoundingBoxAscent, descent:ink.actualBoundingBoxDescent,
+              fontAscent:ink.fontBoundingBoxAscent ?? fontSize*.8, fontDescent:ink.fontBoundingBoxDescent ?? fontSize*.2};
+            metricsCache.set(key,metrics);
+          }
+          const x = anchor.left - rect.left;
+          const y = anchor.top - rect.top + (anchor.height - lineHeight)/2;
+          const baseline = y + (lineHeight - metrics.fontAscent - metrics.fontDescent)/2 + metrics.fontAscent;
+          const span = document.createElement('span');
+          span.textContent = text;
+          span.style.width = `${metrics.width}px`;
+          host.append(span);
+          glyphs.push({span,x,y,left:x - metrics.left,right:x + metrics.right,
+            top:baseline - metrics.ascent,bottom:baseline + metrics.descent});
+        }
+      }
+      host.hidden = true;
+      return {element, id, host, glyphs};
     });
     dirty = false;
   }
 
   function render() {
     if (!active) return;
-    // Read all geometry before writing styles. Pretext reuses measured segments;
-    // only block anchors and the moving silhouette need fresh DOM rectangles.
+    // Pretext measures each grapheme once. DOM ranges preserve the original
+    // kerning and line anchors; moving the cat never recalculates paragraph flow.
     if (dirty) measure();
     const catRect = rig.getBoundingClientRect();
     const obstacle = {...mask, left:catRect.left - mask.margin, right:catRect.left - mask.margin + mask.width,
       top:catRect.top - mask.margin, bottom:catRect.top - mask.margin + mask.height};
     const boxes = entries.map(entry => entry.element.getBoundingClientRect());
-    const styles = [];
+    const letters = entries.flatMap((entry,i) => entry.glyphs.map(glyph => ({
+      left:boxes[i].left + glyph.left, right:boxes[i].left + glyph.right,
+      top:boxes[i].top + glyph.top, bottom:boxes[i].top + glyph.bottom,
+    })));
+    const offsets = glyphOffsets(letters, obstacle, 2 - scrollY);
+    let letterIndex = 0;
     entries.forEach((entry, index) => {
-      const {element, host, paragraphs, lineHeight, fontSize, pool, id} = entry;
+      const {element, host, glyphs, id} = entry;
       const box = boxes[index];
-      const overlaps = box.width > 0 && obstacle.right > box.left && obstacle.left < box.right &&
-        obstacle.bottom > box.top && obstacle.top < box.top + entry.baseHeight;
-      if (!overlaps) {
+      const movements = offsets.slice(letterIndex,letterIndex + glyphs.length);
+      letterIndex += glyphs.length;
+      if (!movements.some(dy => dy !== 0)) {
         element.removeAttribute('data-cat-flow-source');
         host.hidden = true;
         return;
       }
-      const top = box.top + (entry.inline ? (box.height - lineHeight) / 2 : entry.top);
-      const left = box.left + entry.left;
-      const width = Math.max(1, box.width - entry.left - entry.right);
-      const local = {...obstacle, left:obstacle.left - left, right:obstacle.right - left,
-        top:obstacle.top - top, bottom:obstacle.bottom - top};
-      const layout = flowLines(paragraphs, width, lineHeight, local, Math.max(24, fontSize * 1.3), entry.ink);
       element.setAttribute('data-cat-flow-source', String(id));
       host.hidden = false;
-      host.style.transform = `translate(${left + scrollX}px, ${top + scrollY}px)`;
-      layout.lines.forEach((line, i) => {
-        let span = pool[i];
-        if (!span) { span = document.createElement('span'); host.append(span); pool.push(span); }
-        span.hidden = false;
-        if (span.textContent !== line.text) span.textContent = line.text;
-        span.style.transform = `translate(${line.x}px, ${line.y}px)`;
+      host.style.transform = `translate(${box.left + scrollX}px, ${box.top + scrollY}px)`;
+      glyphs.forEach((glyph, i) => {
+        glyph.span.style.transform = `translate(${glyph.x}px, ${glyph.y + movements[i]}px)`;
       });
-      for (let i = layout.lines.length; i < pool.length; i++) pool[i].hidden = true;
-      if (!entry.inline) styles.push(`[data-cat-flow-source="${id}"]{min-height:${Math.max(entry.baseHeight, layout.height + entry.top + entry.bottom)}px!important}`);
     });
-    const css = styles.join('\n');
-    if (rules.textContent !== css) rules.textContent = css;
     frame = requestAnimationFrame(tick);
   }
 
@@ -197,8 +203,8 @@ export function createCatTextFlow(rig) {
     frame = 0;
     changed.disconnect();
     clearSources();
-    layer?.remove(); rules?.remove();
-    layer = rules = mask = null;
+    layer?.remove();
+    layer = mask = null;
   }
 
   return {
@@ -207,8 +213,7 @@ export function createCatTextFlow(rig) {
       layer = document.createElement('div');
       layer.className = 'cat-text-flow';
       layer.setAttribute('aria-hidden', 'true');
-      rules = document.createElement('style');
-      document.body.append(layer, rules);
+      document.body.append(layer);
       try { mask = silhouette(rig); measure(); } catch (error) { stop(); console.warn('Cat text flow unavailable:', error); return; }
       active = true;
       changed.observe(page, {subtree:true, childList:true, characterData:true,
