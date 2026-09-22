@@ -1,4 +1,4 @@
-import { hairstyles, restyledFace, nextHairstyle } from './portrait-hairstyles.js?v=1b69f7a9';
+import { hairstyles, nextHairstyle } from './portrait-hairstyles.js?v=be625f4e';
 
 const portrait = document.querySelector('.portrait');
 const svg = portrait?.querySelector('.portrait-live');
@@ -6,24 +6,33 @@ if (svg) {
   const ns = 'http://www.w3.org/2000/svg';
   const original = svg.querySelector('image');
   original.classList.add('portrait-original');
-  const shirt = document.createElementNS(ns,'clipPath');
-  shirt.id = 'portrait-shirt';
-  shirt.innerHTML = '<path d="M524 843Q549 882 535 921L523 945Q506 932 514 910Q518 892 499 899Q466 906 450 946C361 965 256 1032 218 1088Q198 1120 229 1138C422 1204 853 1206 1037 1144Q1074 1135 1050 1091C1012 1027 916 990 839 957Q826 905 791 882Q775 873 758 884L758 813Z"/>';
-  svg.querySelector('defs').append(shirt);
-  const back = document.createElementNS(ns,'g');
-  back.classList.add('hair-shape','hair-back','portrait-restyled');
-  back.setAttribute('fill','#0b0c09');
-  const face = document.createElementNS(ns,'g');
-  face.classList.add('portrait-restyled');
-  face.innerHTML = restyledFace;
-  const front = document.createElementNS(ns,'g');
-  front.classList.add('hair-shape','hair-front','portrait-restyled');
-  front.setAttribute('fill','#0b0c09');
-  const detail = document.createElementNS(ns,'g');
-  detail.classList.add('hair-shape','portrait-restyled');
-  detail.setAttribute('fill','white');
-  original.before(back,face);
-  original.after(front,detail);
+  // Complementary masks split the traced artwork without clipping its volume.
+  // The face/clothing stay anchored while a subtle ruffle moves only the hair.
+  const core = 'M356 545L372 510L372 468Q441 460 527 470L639 470Q704 431 809 449L844 515L868 543L940 528L951 596L870 683L822 792L781 852L791 875L840 940L1110 990L1115 1210H160V1010L447 942L493 882L520 871L438 817L376 730L342 633Z';
+  for (const hair of [false,true]) {
+    const mask = document.createElementNS(ns,'mask');
+    mask.id = hair ? 'portrait-hair-region' : 'portrait-core-region';
+    mask.setAttribute('maskUnits','userSpaceOnUse');
+    mask.setAttribute('x','0'); mask.setAttribute('y','0');
+    mask.setAttribute('width','1254'); mask.setAttribute('height','1254');
+    // A tiny overlap avoids antialiasing seams between complementary masks.
+    mask.innerHTML = `<rect width="1254" height="1254" fill="${hair?'white':'black'}"/><path d="${core}" fill="${hair?'black':'white'}" stroke="${hair?'none':'white'}" stroke-width="3" stroke-linejoin="round"/>`;
+    svg.querySelector('defs').append(mask);
+  }
+  const art = document.createElementNS(ns,'g');
+  art.classList.add('portrait-restyled');
+  art.setAttribute('mask','url(#face-features)');
+  art.setAttribute('fill','#0b0c09');
+  art.setAttribute('fill-rule','evenodd');
+  const face = document.createElementNS(ns,'path');
+  face.setAttribute('mask','url(#portrait-core-region)');
+  const hairWindow = document.createElementNS(ns,'g');
+  hairWindow.setAttribute('mask','url(#portrait-hair-region)');
+  const hair = document.createElementNS(ns,'path');
+  hair.classList.add('hair-shape');
+  hairWindow.append(hair);
+  art.append(face,hairWindow);
+  original.before(art);
 
   const button = document.createElement('button');
   button.type = 'button';
@@ -44,24 +53,14 @@ if (svg) {
   let animations = [], revision = 0, snapshotURL = null;
   // A matching static snapshot also keeps no-motion rendering and the existing
   // portrait surface sampling aligned with the selected silhouette.
-  const originalData = fetch('assets/me.png').then(r => {
-    if (!r.ok) throw new Error('Portrait image unavailable');
-    return r.blob();
-  }).then(blob => new Promise((resolve,reject) => {
-    const reader = new FileReader(); reader.onload = () => resolve(reader.result);
-    reader.onerror = reject; reader.readAsDataURL(blob);
-  })).catch(() => null);
   async function snapshot() {
     const token = ++revision, fallback = portrait.querySelector('.portrait-fallback');
     if (!selected) { fallback.src = 'assets/me.png'; return; }
-    const data = await originalData;
-    if (!data || token !== revision) return;
     const copy = svg.cloneNode(true);
     copy.setAttribute('xmlns',ns); copy.setAttribute('width','1254'); copy.setAttribute('height','1254');
     copy.removeAttribute('class');
     copy.querySelector('.portrait-original').remove();
     copy.querySelector('.tongue').remove();
-    copy.querySelectorAll('image').forEach(image => image.setAttribute('href',data));
     const background = document.createElementNS(ns,'rect');
     background.setAttribute('width','1254'); background.setAttribute('height','1254'); background.setAttribute('fill','white');
     copy.prepend(background);
@@ -76,9 +75,8 @@ if (svg) {
     clearTimeout(clickTimer); clickTimer = 0;
     selected = index;
     const style = hairstyles[index];
-    back.innerHTML = style.back ? `<path d="${style.back}"/>` : '';
-    front.innerHTML = style.front ? `<path d="${style.front}"/>` : '';
-    detail.innerHTML = style.detail ? `<path d="${style.detail}"/>` : '';
+    face.setAttribute('d',style.path);
+    hair.setAttribute('d',style.path);
     portrait.dataset.hairstyle = style.id;
     hint.querySelector('.hair-name').textContent = style.name;
     if (announce) status.textContent = `${style.name} hairstyle. Swipe to change; double-tap to reset.`;
@@ -86,8 +84,8 @@ if (svg) {
     animations.forEach(animation => animation.cancel());
     if (!reduced.matches && announce) {
       animations = [...svg.querySelectorAll('.hair-shape')].map(layer => layer.animate([
-        {transform:'rotate(-1.8deg)'},
-        {transform:'rotate(.8deg)',offset:.45},
+        {transform:'rotate(-.7deg)'},
+        {transform:'rotate(.3deg)',offset:.45},
         {transform:'rotate(0deg)'},
       ],{duration:480,easing:'cubic-bezier(.22,.7,.25,1)'}));
     }
@@ -118,7 +116,7 @@ if (svg) {
     }
     gesture.distance += Math.abs(event.clientX - gesture.last);
     gesture.last = event.clientX;
-    if (!reduced.matches) portrait.style.setProperty('--hair-ruffle',`${Math.max(-5,Math.min(5,(event.clientX-gesture.start)/6))}deg`);
+    if (!reduced.matches) portrait.style.setProperty('--hair-ruffle',`${Math.max(-2,Math.min(2,(event.clientX-gesture.start)/14))}deg`);
   });
   button.addEventListener('pointerup',event => {
     if (!gesture || event.pointerId !== gesture.id) return;
