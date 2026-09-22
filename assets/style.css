@@ -36,14 +36,13 @@ h1 { margin: 20px 0 20px; font: 400 clamp(64px, 8.8vw, 128px)/1.02 Georgia, var(
 @keyframes blink { 0%, 100% { transform: scaleY(1); } 45%, 55% { transform: scaleY(.07); } }
 
 /* Hair is an independent little toy; all facial animation keeps its anchors. */
-.portrait.has-hairstyles .portrait-live { visibility: visible; transform-origin: 50% 75%; }
+.portrait.has-hairstyles .portrait-live { visibility: visible; }
 .portrait.has-hairstyles .portrait-fallback { visibility: hidden; }
 .portrait-restyled { display: none; }
 .portrait[data-hairstyle]:not([data-hairstyle="original"]) .portrait-original { display: none; }
 .portrait[data-hairstyle]:not([data-hairstyle="original"]) .portrait-restyled { display: inline; }
 .hair-shape { transform: rotate(var(--hair-ruffle, 0deg)); transform-origin: 627px 460px; transition: transform 280ms ease-out; }
 .is-ruffling .hair-shape { transition: transform 70ms linear; }
-.portrait.is-ruffling[data-hairstyle="original"] .portrait-live { transform: rotate(var(--hair-ruffle, 0deg)); }
 .hair-touch { position: absolute; left: 17%; top: 7%; width: 64%; height: 36%; border: 0; border-radius: 48%; background: transparent; padding: 0; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; z-index: 2; }
 .hair-touch:active { cursor: grabbing; }
 .hair-touch:focus-visible { outline: 1px dashed var(--muted); outline-offset: 4px; }

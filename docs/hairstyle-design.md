@@ -23,6 +23,10 @@ no tracing library or generated raster-image dependency at runtime.
 overlapping masks. Eyes and mouth use the existing independent expression layers.
 A static SVG snapshot keeps the existing portrait surface sampling in sync.
 
+The original mode uses the unchanged PNG as a stationary base and a feathered
+hair overlay. Ruffling rotates that overlay only, keeping the face and clothing
+fixed without seams at the fringe or collar. Its resting appearance is unchanged.
+
 The single-click, swipe, back-and-forth ruffle, double-tap reset, keyboard controls,
 local preference and reduced-motion support are retained.
 

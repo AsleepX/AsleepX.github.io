@@ -4,8 +4,7 @@ const portrait = document.querySelector('.portrait');
 const svg = portrait?.querySelector('.portrait-live');
 if (svg) {
   const ns = 'http://www.w3.org/2000/svg';
-  const original = svg.querySelector('image');
-  original.classList.add('portrait-original');
+  const originalImage = svg.querySelector('image');
   // Complementary masks split the traced artwork without clipping its volume.
   // The face/clothing stay anchored while a subtle ruffle moves only the hair.
   const core = 'M356 545L372 510L372 468Q441 460 527 470L639 470Q704 431 809 449L844 515L868 543L940 528L951 596L870 683L822 792L781 852L791 875L840 940L1110 990L1115 1210H160V1010L447 942L493 882L520 871L438 817L376 730L342 633Z';
@@ -19,6 +18,31 @@ if (svg) {
     mask.innerHTML = `<rect width="1254" height="1254" fill="${hair?'white':'black'}"/><path d="${core}" fill="${hair?'black':'white'}" stroke="${hair?'none':'white'}" stroke-width="3" stroke-linejoin="round"/>`;
     svg.querySelector('defs').append(mask);
   }
+  // Keep the original as a stationary base. A feathered overlay moves its hair
+  // without opening seams at the fringe, cheeks or collar of the raster image.
+  const feather = document.createElementNS(ns,'filter');
+  feather.id = 'portrait-original-feather';
+  feather.innerHTML = '<feGaussianBlur stdDeviation="16"/>';
+  const originalHairMask = document.createElementNS(ns,'mask');
+  originalHairMask.id = 'portrait-original-hair';
+  originalHairMask.setAttribute('maskUnits','userSpaceOnUse');
+  originalHairMask.setAttribute('x','0'); originalHairMask.setAttribute('y','0');
+  originalHairMask.setAttribute('width','1254'); originalHairMask.setAttribute('height','1254');
+  originalHairMask.innerHTML = `<rect width="1254" height="1254" fill="white"/><path d="${core}" fill="black" stroke="black" stroke-width="32" filter="url(#portrait-original-feather)"/><rect y="910" width="1254" height="344" fill="black"/>`;
+  svg.querySelector('defs').append(feather,originalHairMask);
+  const original = document.createElementNS(ns,'g');
+  original.classList.add('portrait-original');
+  original.setAttribute('mask','url(#face-features)');
+  const originalHair = originalImage.cloneNode(true);
+  originalHair.removeAttribute('mask');
+  originalHair.classList.add('hair-shape');
+  const originalHairWindow = document.createElementNS(ns,'g');
+  originalHairWindow.setAttribute('mask','url(#portrait-original-hair)');
+  originalHairWindow.append(originalHair);
+  originalImage.replaceWith(original);
+  originalImage.removeAttribute('mask');
+  original.append(originalImage,originalHairWindow);
+
   const art = document.createElementNS(ns,'g');
   art.classList.add('portrait-restyled');
   art.setAttribute('mask','url(#face-features)');
