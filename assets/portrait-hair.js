@@ -1,4 +1,4 @@
-import { hairstyles, nextHairstyle } from './portrait-hairstyles.js?v=be625f4e';
+import { hairstyles, nextHairstyle } from './portrait-hairstyles.js?v=3c90981d';
 
 const portrait = document.querySelector('.portrait');
 const svg = portrait?.querySelector('.portrait-live');

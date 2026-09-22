@@ -7,9 +7,9 @@ The avatar uses a small vanilla JavaScript animation and SVG facial layers:
 its eyes follow the pointer and it blinks naturally. After four seconds without
 pointer movement, its tongue stays out until the pointer moves again. Animation pauses offscreen and in hidden tabs. Reduced-motion
 preferences keep the selected portrait still; disabled JavaScript retains the original.
-The portrait has six black-and-white hairstyles: original, airy shag, airy bob,
-loose ponytail, messy buns and layered waves. Five image-model studies were
-converted to SVG curves to retain lifted roots, full crowns and layered silhouettes
+The portrait has six black-and-white hairstyles: the unchanged original, soft
+crop, soft bob, natural ponytail, twin buns and soft waves. Five image-model studies
+were converted to SVG curves, with moderate volume and tidy, gently curved locks
 (see [design notes](docs/hairstyle-design.md)). Swipe across the hair to cycle, ruffle
 back and forth to pick a different style, or double-tap to restore the original.
 A single click/tap also cycles; keyboard users can use Enter, Space, arrow keys

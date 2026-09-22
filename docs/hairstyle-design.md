@@ -4,9 +4,12 @@ The five alternative hairstyles were redesigned on 2026-09-22. Each began as an
 individual image-model edit of `assets/me.png`, using the built-in image-generation
 tool. The original hairstyle is still the unchanged original asset.
 
-The studies preserve the original face, pose and clothing while adding lifted
-roots, generous crown volume, soft temple locks and organic layered ends. They
-replace the earlier hand-built silhouettes that fitted too closely to the scalp.
+The studies preserve the original face, pose and clothing. The five alternatives
+are a soft side-part crop, a gently rounded bob, a natural ponytail, compact twin
+buns and restrained shoulder-length waves. Their crowns stay close to the
+original avatar's proportions, with modest root lift and smooth, deliberate
+locks. Reduced side volume, fewer loose tips and broad curves replace the previous
+overly fluffy, tousled silhouettes. `assets/me.png` remains untouched.
 
 ## Code rendering
 
