@@ -38,7 +38,7 @@ export function collectPlatforms(track) {
   let text;
   let i = 0;
   while ((text = walker.nextNode())) {
-    if (!text.textContent.trim() || text.parentElement.closest('.cat, svg, script, .skip-link')) continue;
+    if (!text.textContent.trim() || text.parentElement.closest('.cat, svg, script, .skip-link, .hair-hint, .hair-status')) continue;
     const style = getComputedStyle(text.parentElement);
     if (style.visibility === 'hidden' || style.display === 'none') continue;
     for (const contour of textContours(text)) {

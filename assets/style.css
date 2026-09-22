@@ -35,6 +35,25 @@ h1 { margin: 20px 0 20px; font: 400 clamp(64px, 8.8vw, 128px)/1.02 Georgia, var(
 .is-cheeky .tongue { transform: scaleY(1); }
 @keyframes blink { 0%, 100% { transform: scaleY(1); } 45%, 55% { transform: scaleY(.07); } }
 
+/* Hair is an independent little toy; all facial animation keeps its anchors. */
+.portrait.has-hairstyles .portrait-live { visibility: visible; transform-origin: 50% 75%; }
+.portrait.has-hairstyles .portrait-fallback { visibility: hidden; }
+.portrait-restyled { display: none; }
+.portrait[data-hairstyle]:not([data-hairstyle="original"]) .portrait-original { display: none; }
+.portrait[data-hairstyle]:not([data-hairstyle="original"]) .portrait-restyled { display: inline; }
+.hair-shape { transform: rotate(var(--hair-ruffle, 0deg)); transform-origin: 627px 460px; transition: transform 280ms ease-out; }
+.is-ruffling .hair-shape { transition: transform 70ms linear; }
+.portrait.is-ruffling[data-hairstyle="original"] .portrait-live { transform: rotate(var(--hair-ruffle, 0deg)); }
+.hair-touch { position: absolute; left: 17%; top: 7%; width: 64%; height: 36%; border: 0; border-radius: 48%; background: transparent; padding: 0; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; z-index: 2; }
+.hair-touch:active { cursor: grabbing; }
+.hair-touch:focus-visible { outline: 1px dashed var(--muted); outline-offset: 4px; }
+.hair-hint { position: absolute; top: calc(100% + 6px); left: 0; width: 100%; text-align: center; color: var(--muted); font: 11px/1.5 var(--sans); letter-spacing: .02em; pointer-events: none; }
+.hair-name { display: none; }
+.portrait:hover .hair-name, .portrait:focus-within .hair-name { display: inline; }
+.portrait:hover .hair-instruction, .portrait:focus-within .hair-instruction { display: none; }
+.hair-status { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+@media (prefers-reduced-motion: reduce) { .hair-shape { transition: none; } }
+
 .info-row { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 44px; padding: 44px 0; border-top: 1px solid var(--rule); }
 h2 { margin: 8px 0 0; font-size: 16px; line-height: 1.5; font-weight: 400; letter-spacing: 0.16em; text-transform: uppercase; color: var(--muted); }
 p { margin: 0; }
@@ -128,7 +147,7 @@ footer { border-top: 1px solid var(--rule); padding: 23px 0 30px; display: flex;
 @keyframes cat-whisker-sway { 0%, 100% { transform: rotate(-2deg); } 45% { transform: rotate(3deg); } 70% { transform: rotate(0deg); } }
 .portrait.is-paused .portrait-cat-ear, .portrait.is-paused .cat-whisker { animation-play-state: paused; }
 .cat.is-fusing { pointer-events: none; }
-.cat-ear-button { position: absolute; top: 2%; width: 20%; height: 21%; min-width: 30px; min-height: 30px; border: 0; padding: 0; background: transparent; cursor: pointer; z-index: 2; }
+.cat-ear-button { position: absolute; top: 2%; width: 20%; height: 21%; min-width: 30px; min-height: 30px; border: 0; padding: 0; background: transparent; cursor: pointer; z-index: 3; }
 .cat-ear-button-left { left: 25%; }
 .cat-ear-button-right { left: 58%; }
 .cat-ear-button:focus-visible { outline: 1px dashed var(--muted); outline-offset: 3px; border-radius: 50%; }

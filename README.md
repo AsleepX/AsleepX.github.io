@@ -6,7 +6,14 @@ No external font or CDN requests, and no build step.
 The avatar uses a small vanilla JavaScript animation and SVG facial layers:
 its eyes follow the pointer and it blinks naturally. After four seconds without
 pointer movement, its tongue stays out until the pointer moves again. Animation pauses offscreen and in hidden tabs. Reduced-motion
-preferences and disabled JavaScript retain the original static portrait.
+preferences keep the selected portrait still; disabled JavaScript retains the original.
+The portrait has six black-and-white hairstyles: original, tousled crop, soft bob,
+high ponytail, space buns and loose waves. Swipe across the hair to cycle, ruffle
+back and forth to pick a different style, or double-tap to restore the original.
+A single click/tap also cycles; keyboard users can use Enter, Space, arrow keys
+and Home. The selected style is saved locally. SVG hair layers share the same
+face/expression anchors, and a matching static snapshot refreshes portrait contours.
+Hair controls work independently of the cat.
 A small black cat sleeps on the introduction divider. Clicking or keyboard-activating
 it makes it run away along the line and settle back to sleep. Hold and drag its
 head, body, or tail to pick it up in different poses. On release, it falls onto
