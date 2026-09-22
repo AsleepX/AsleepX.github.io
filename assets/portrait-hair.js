@@ -42,7 +42,7 @@ if (svg) {
   button.title = 'Swipe to restyle · Ruffle to surprise · Double-tap to reset';
   const hint = document.createElement('span');
   hint.className = 'hair-hint'; hint.id = 'hair-hint';
-  hint.innerHTML = '<span class="hair-name">Original</span><span class="hair-instruction">Ruffle my hair ↔</span>';
+  hint.textContent = 'Swipe to change hairstyle, ruffle for a surprise, or double-tap to restore the original.';
   const status = document.createElement('span');
   status.className = 'hair-status'; status.setAttribute('role','status');
   portrait.append(button,hint,status);
@@ -78,7 +78,6 @@ if (svg) {
     face.setAttribute('d',style.path);
     hair.setAttribute('d',style.path);
     portrait.dataset.hairstyle = style.id;
-    hint.querySelector('.hair-name').textContent = style.name;
     if (announce) status.textContent = `${style.name} hairstyle. Swipe to change; double-tap to reset.`;
     try { localStorage.setItem('portrait-hairstyle',style.id); } catch { /* Storage is optional. */ }
     animations.forEach(animation => animation.cancel());

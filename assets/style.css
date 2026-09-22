@@ -47,11 +47,7 @@ h1 { margin: 20px 0 20px; font: 400 clamp(64px, 8.8vw, 128px)/1.02 Georgia, var(
 .hair-touch { position: absolute; left: 17%; top: 7%; width: 64%; height: 36%; border: 0; border-radius: 48%; background: transparent; padding: 0; cursor: grab; touch-action: none; -webkit-tap-highlight-color: transparent; z-index: 2; }
 .hair-touch:active { cursor: grabbing; }
 .hair-touch:focus-visible { outline: 1px dashed var(--muted); outline-offset: 4px; }
-.hair-hint { position: absolute; top: calc(100% + 6px); left: 0; width: 100%; text-align: center; color: var(--muted); font: 11px/1.5 var(--sans); letter-spacing: .02em; pointer-events: none; }
-.hair-name { display: none; }
-.portrait:hover .hair-name, .portrait:focus-within .hair-name { display: inline; }
-.portrait:hover .hair-instruction, .portrait:focus-within .hair-instruction { display: none; }
-.hair-status { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.hair-hint, .hair-status { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 @media (prefers-reduced-motion: reduce) { .hair-shape { transition: none; } }
 
 .info-row { display: grid; grid-template-columns: 232px minmax(0, 1fr); gap: 44px; padding: 44px 0; border-top: 1px solid var(--rule); }
