@@ -28,7 +28,10 @@ if (svg) {
   originalHairMask.setAttribute('maskUnits','userSpaceOnUse');
   originalHairMask.setAttribute('x','0'); originalHairMask.setAttribute('y','0');
   originalHairMask.setAttribute('width','1254'); originalHairMask.setAttribute('height','1254');
-  originalHairMask.innerHTML = `<rect width="1254" height="1254" fill="white"/><path d="${core}" fill="black" stroke="black" stroke-width="32" filter="url(#portrait-original-feather)"/><rect y="910" width="1254" height="344" fill="black"/>`;
+  // The collar peaks above y=910. Exclude its full swept area after feathering
+  // so blurred mask edges cannot leak a second, moving copy of either lapel.
+  const collarGuard = 'M0 910H440V840H930V910H1254V1254H0Z';
+  originalHairMask.innerHTML = `<rect width="1254" height="1254" fill="white"/><path d="${core}" fill="black" stroke="black" stroke-width="32" filter="url(#portrait-original-feather)"/><path d="${collarGuard}" fill="black"/>`;
   svg.querySelector('defs').append(feather,originalHairMask);
   const original = document.createElementNS(ns,'g');
   original.classList.add('portrait-original');
