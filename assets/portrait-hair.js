@@ -1,50 +1,59 @@
 import { hairstyles, nextHairstyle } from './portrait-hairstyles.js?v=3c90981d';
+import { createHairDisplacementPixels, HAIR_MAP_SCALE } from './portrait-hair-motion.js?v=94218485';
 
 const portrait = document.querySelector('.portrait');
 const svg = portrait?.querySelector('.portrait-live');
 if (svg) {
   const ns = 'http://www.w3.org/2000/svg';
   const originalImage = svg.querySelector('image');
-  // Complementary masks split the traced artwork without clipping its volume.
-  // The face/clothing stay anchored while a subtle ruffle moves only the hair.
-  const core = 'M356 545L372 510L372 468Q441 460 527 470L639 470Q704 431 809 449L844 515L868 543L940 528L951 596L870 683L822 792L781 852L791 875L840 940L1110 990L1115 1210H160V1010L447 942L493 882L520 871L438 817L376 730L342 633Z';
-  for (const hair of [false,true]) {
-    const mask = document.createElementNS(ns,'mask');
-    mask.id = hair ? 'portrait-hair-region' : 'portrait-core-region';
-    mask.setAttribute('maskUnits','userSpaceOnUse');
-    mask.setAttribute('x','0'); mask.setAttribute('y','0');
-    mask.setAttribute('width','1254'); mask.setAttribute('height','1254');
-    // A tiny overlap avoids antialiasing seams between complementary masks.
-    mask.innerHTML = `<rect width="1254" height="1254" fill="${hair?'white':'black'}"/><path d="${core}" fill="${hair?'black':'white'}" stroke="${hair?'none':'white'}" stroke-width="3" stroke-linejoin="round"/>`;
-    svg.querySelector('defs').append(mask);
+  // Warp the hair continuously instead of rotating artwork through a fixed
+  // face cutout. The motion map is zero over the face, ears, neck and clothing.
+  const {data,mask,width,height} = createHairDisplacementPixels();
+  const canvas = document.createElement('canvas');
+  canvas.width = width; canvas.height = height;
+  const context = canvas.getContext('2d');
+  const encode = pixels => {
+    context.putImageData(new ImageData(pixels,width,height),0,0);
+    return canvas.toDataURL();
+  };
+  const mapURL = encode(data), windowURL = encode(mask);
+  const filter = document.createElementNS(ns,'filter');
+  filter.id = 'portrait-hair-warp';
+  filter.setAttribute('filterUnits','userSpaceOnUse');
+  filter.setAttribute('x','0'); filter.setAttribute('y','0');
+  filter.setAttribute('width','1254'); filter.setAttribute('height','1254');
+  filter.setAttribute('color-interpolation-filters','sRGB');
+  filter.innerHTML = `<feImage href="${mapURL}" x="0" y="0" width="1254" height="1254" preserveAspectRatio="none" result="map"/><feComponentTransfer in="map" result="movement"><feFuncR type="linear" slope="${255/254}" intercept="${-1/254}"/><feFuncG type="linear" slope="${255/254}" intercept="${-1/254}"/></feComponentTransfer><feDisplacementMap in="SourceGraphic" in2="movement" scale="0" xChannelSelector="R" yChannelSelector="G"/>`;
+  const displacement = filter.querySelector('feDisplacementMap');
+  const motionMask = document.createElementNS(ns,'mask');
+  motionMask.id = 'portrait-hair-motion-region';
+  motionMask.setAttribute('maskUnits','userSpaceOnUse');
+  motionMask.setAttribute('x','0'); motionMask.setAttribute('y','0');
+  motionMask.setAttribute('width','1254'); motionMask.setAttribute('height','1254');
+  motionMask.innerHTML = `<image href="${windowURL}" width="1254" height="1254"/>`;
+  svg.querySelector('defs').append(filter,motionMask);
+  const windows = [];
+  function movingLayer(source) {
+    const window = document.createElementNS(ns,'g');
+    window.classList.add('portrait-hair-motion');
+    window.setAttribute('mask','url(#portrait-hair-motion-region)');
+    window.setAttribute('display','none');
+    const warped = document.createElementNS(ns,'g');
+    warped.setAttribute('filter','url(#portrait-hair-warp)');
+    // Opaque white travels with the ink, erasing the old silhouette underneath.
+    // The window fades only where displacement has already approached zero.
+    const background = document.createElementNS(ns,'rect');
+    background.setAttribute('width','1254'); background.setAttribute('height','1254');
+    background.setAttribute('fill','white');
+    warped.append(background,source); window.append(warped); windows.push(window);
+    return window;
   }
-  // Keep the original as a stationary base. A feathered overlay moves its hair
-  // without opening seams at the fringe, cheeks or collar of the raster image.
-  const feather = document.createElementNS(ns,'filter');
-  feather.id = 'portrait-original-feather';
-  feather.innerHTML = '<feGaussianBlur stdDeviation="16"/>';
-  const originalHairMask = document.createElementNS(ns,'mask');
-  originalHairMask.id = 'portrait-original-hair';
-  originalHairMask.setAttribute('maskUnits','userSpaceOnUse');
-  originalHairMask.setAttribute('x','0'); originalHairMask.setAttribute('y','0');
-  originalHairMask.setAttribute('width','1254'); originalHairMask.setAttribute('height','1254');
-  // The collar peaks above y=910. Exclude its full swept area after feathering
-  // so blurred mask edges cannot leak a second, moving copy of either lapel.
-  const collarGuard = 'M0 910H440V840H930V910H1254V1254H0Z';
-  originalHairMask.innerHTML = `<rect width="1254" height="1254" fill="white"/><path d="${core}" fill="black" stroke="black" stroke-width="32" filter="url(#portrait-original-feather)"/><path d="${collarGuard}" fill="black"/>`;
-  svg.querySelector('defs').append(feather,originalHairMask);
   const original = document.createElementNS(ns,'g');
   original.classList.add('portrait-original');
   original.setAttribute('mask','url(#face-features)');
-  const originalHair = originalImage.cloneNode(true);
-  originalHair.removeAttribute('mask');
-  originalHair.classList.add('hair-shape');
-  const originalHairWindow = document.createElementNS(ns,'g');
-  originalHairWindow.setAttribute('mask','url(#portrait-original-hair)');
-  originalHairWindow.append(originalHair);
   originalImage.replaceWith(original);
   originalImage.removeAttribute('mask');
-  original.append(originalImage,originalHairWindow);
+  original.append(originalImage,movingLayer(originalImage.cloneNode(true)));
 
   const art = document.createElementNS(ns,'g');
   art.classList.add('portrait-restyled');
@@ -52,13 +61,8 @@ if (svg) {
   art.setAttribute('fill','#0b0c09');
   art.setAttribute('fill-rule','evenodd');
   const face = document.createElementNS(ns,'path');
-  face.setAttribute('mask','url(#portrait-core-region)');
-  const hairWindow = document.createElementNS(ns,'g');
-  hairWindow.setAttribute('mask','url(#portrait-hair-region)');
   const hair = document.createElementNS(ns,'path');
-  hair.classList.add('hair-shape');
-  hairWindow.append(hair);
-  art.append(face,hairWindow);
+  art.append(face,movingLayer(hair));
   original.before(art);
 
   const button = document.createElement('button');
@@ -77,7 +81,31 @@ if (svg) {
 
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   let selected = 0, gesture = null, clickTimer = 0, suppressClick = false;
-  let animations = [], revision = 0, snapshotURL = null;
+  let revision = 0, snapshotURL = null;
+  let amount = 0, target = 0, motionFrame = 0, motionTime = 0;
+  function renderMotion() {
+    displacement.setAttribute('scale',(amount*HAIR_MAP_SCALE/2).toFixed(3));
+    for (const window of windows) window.setAttribute('display',Math.abs(amount) > .005 ? 'inline' : 'none');
+  }
+  function stopMotion() {
+    cancelAnimationFrame(motionFrame); motionFrame = 0; motionTime = 0;
+    amount = target = 0; renderMotion();
+  }
+  function tickMotion(now) {
+    const dt = Math.min(.05,motionTime ? (now-motionTime)/1000 : 1/60);
+    motionTime = now;
+    amount += (target-amount)*(1-Math.exp(-dt/(gesture ? .035 : .085)));
+    if (Math.abs(target-amount) < .005) amount = target;
+    renderMotion();
+    if (amount !== target) motionFrame = requestAnimationFrame(tickMotion);
+    else { motionFrame = 0; motionTime = 0; }
+  }
+  function moveHair(value) {
+    if (reduced.matches) { stopMotion(); return; }
+    target = Math.max(-2,Math.min(2,value));
+    if (!motionFrame) motionFrame = requestAnimationFrame(tickMotion);
+  }
+  reduced.addEventListener('change',() => { if (reduced.matches) stopMotion(); });
   // A matching static snapshot also keeps no-motion rendering and the existing
   // portrait surface sampling aligned with the selected silhouette.
   async function snapshot() {
@@ -88,6 +116,9 @@ if (svg) {
     copy.removeAttribute('class');
     copy.querySelector('.portrait-original').remove();
     copy.querySelector('.tongue').remove();
+    copy.querySelectorAll('.portrait-hair-motion').forEach(layer => layer.remove());
+    copy.querySelector('#portrait-hair-warp').remove();
+    copy.querySelector('#portrait-hair-motion-region').remove();
     const background = document.createElementNS(ns,'rect');
     background.setAttribute('width','1254'); background.setAttribute('height','1254'); background.setAttribute('fill','white');
     copy.prepend(background);
@@ -107,26 +138,22 @@ if (svg) {
     portrait.dataset.hairstyle = style.id;
     if (announce) status.textContent = `${style.name} hairstyle. Swipe to change; double-tap to reset.`;
     try { localStorage.setItem('portrait-hairstyle',style.id); } catch { /* Storage is optional. */ }
-    animations.forEach(animation => animation.cancel());
+    stopMotion();
     if (!reduced.matches && announce) {
-      animations = [...svg.querySelectorAll('.hair-shape')].map(layer => layer.animate([
-        {transform:'rotate(-.7deg)'},
-        {transform:'rotate(.3deg)',offset:.45},
-        {transform:'rotate(0deg)'},
-      ],{duration:480,easing:'cubic-bezier(.22,.7,.25,1)'}));
+      amount = -.7; renderMotion(); moveHair(0);
     }
     snapshot();
   }
   function clearGesture() {
     if (gesture && button.hasPointerCapture(gesture.id)) button.releasePointerCapture(gesture.id);
     gesture = null;
-    portrait.style.removeProperty('--hair-ruffle');
+    moveHair(0);
     portrait.classList.remove('is-ruffling');
   }
   button.addEventListener('pointerdown',event => {
     if (event.button !== 0 || gesture) return;
     suppressClick = false;
-    animations.forEach(animation => animation.cancel());
+    stopMotion();
     gesture = {id:event.pointerId,start:event.clientX,last:event.clientX,turn:event.clientX,sign:0,reversals:0,distance:0};
     button.setPointerCapture(event.pointerId);
     portrait.classList.add('is-ruffling');
@@ -142,7 +169,7 @@ if (svg) {
     }
     gesture.distance += Math.abs(event.clientX - gesture.last);
     gesture.last = event.clientX;
-    if (!reduced.matches) portrait.style.setProperty('--hair-ruffle',`${Math.max(-2,Math.min(2,(event.clientX-gesture.start)/14))}deg`);
+    moveHair((event.clientX-gesture.start)/14);
   });
   button.addEventListener('pointerup',event => {
     if (!gesture || event.pointerId !== gesture.id) return;

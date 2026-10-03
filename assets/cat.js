@@ -1,7 +1,7 @@
-import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight, stepFlight } from './cat-world.js?v=2f05f4b1';
+import { clamp, collectPlatforms, firstLanding, findRoute, jumpHeight, contactAt, standingHeight, stepFlight } from './cat-world.js?v=57253b63';
 import { groundedPaw, walkingLeg } from './cat-pose.js?v=380f73e8';
 import { overFace, fusionDwell, isFaceSurface } from './cat-fusion.js?v=afa85834';
-import { createCatTextFlow } from './cat-text-flow.js?v=cbc9ea91';
+import { createCatTextFlow } from './cat-text-flow.js?v=38a6d354';
 
 (() => {
   const cat = document.querySelector('.cat');
@@ -601,9 +601,9 @@ import { createCatTextFlow } from './cat-text-flow.js?v=cbc9ea91';
     });
     if (relevant) terrainChanged();
   });
-  contentChanges.observe(document.querySelector('.page'), {
+  document.querySelectorAll('.header-inner, .page, .footer-inner').forEach(root => contentChanges.observe(root, {
     subtree: true, childList: true, characterData: true, attributes: true, attributeFilter: ['style', 'class'],
-  });
+  }));
   document.fonts?.addEventListener('loadingdone', terrainChanged);
   document.fonts?.addEventListener('loadingdone', () => textFlow.invalidate());
   document.querySelector('.portrait-fallback')?.addEventListener('load', terrainChanged);

@@ -4,25 +4,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Zixuan Zhao — first-year master's student at Shanghai University of Finance and Economics. Research interests in artificial intelligence and machine learning. Photography through a 35mm lens.">
-  <meta name="theme-color" content="#ffffff">
+  <meta name="theme-color" content="#faf8ef">
   <title>Zixuan Zhao — AsleepX</title>
   <link rel="icon" href="assets/me.png" type="image/png">
-  <link rel="stylesheet" href="assets/style.css?v=83f5917b">
+  <link rel="preload" href="assets/fonts/caveat-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/patrick-hand-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/style.css?v=f2096ad7">
+  <script type="module" src="assets/page-paper.js?v=b1116d5e"></script>
+  <script type="module" src="assets/text-selection.js?v=441bd79f"></script>
   <script src="assets/portrait.js?v=2d704656" defer></script>
-  <script type="module" src="assets/portrait-hair.js?v=a2ab581a" defer></script>
-  <script type="module" src="assets/cat.js?v=62baab9c" defer></script>
+  <script type="module" src="assets/portrait-hair.js?v=4ea68463" defer></script>
+  <script type="module" src="assets/footer-wood.js?v=9f7907e1" defer></script>
+  <script type="module" src="assets/header-cloth.js?v=81e7d6ad" defer></script>
+  <script type="module" src="assets/cat.js?v=9d07f854" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
-  <div class="page">
-    <header class="header">
+  <header class="header header--woven">
+    <div class="header-inner">
       <a class="brand" href="./" aria-label="AsleepX home">AsleepX</a>
       <nav aria-label="Main navigation">
         <a href="#research">Research</a>
         <a href="#photography">Photography</a>
         <a href="#contact">Contact</a>
       </nav>
-    </header>
+    </div>
+  </header>
+  <div class="page">
     <main id="main">
       <section class="intro" aria-labelledby="name">
         <div>
@@ -135,8 +143,10 @@
         </div>
       </section>
     </main>
-    <footer><span>Zixuan Zhao</span><span>Shanghai, China</span></footer>
   </div>
+  <footer class="footer--wood">
+    <div class="footer-inner"><span>Zixuan Zhao</span><span>Shanghai, China</span></div>
+  </footer>
   <dialog class="photo-lightbox" aria-label="Photograph viewer">
     <button class="photo-close" type="button" aria-label="Close photograph">Close ×</button>
     <img class="photo-full" alt="">

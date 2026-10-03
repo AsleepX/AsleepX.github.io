@@ -3,6 +3,51 @@
 A minimal English academic homepage, built with semantic HTML and responsive CSS.
 No external font or CDN requests, and no build step.
 
+The journal-inspired typography pairs Caveat for names and headings with Patrick
+Hand for readable handwritten notes, navigation and contact details. Both Latin
+font files are served locally, with their SIL Open Font Licenses in `assets/fonts/`.
+Text stays selectable HTML; glyph contours continue to follow the rendered fonts.
+
+The page uses a restrained cream writing-paper surface inspired by MIDORI MD
+Paper. Its seamless material is generated in code from fine pulp variation,
+surface tooth and short cellulose fibres, then cached at display density. It
+scrolls with the document, without continuous animation or downloaded textures.
+The footer's overlapping paper edge samples the same material in document
+coordinates. The unchanged black-and-white portrait blends into the paper;
+photographs retain their original colours.
+
+Text selection looks like a soft yellow felt-tip highlighter on the paper:
+translucent ink, gently irregular chisel edges, fine nib streaks and slight ink
+pooling. A pointer-transparent canvas follows the browser's selected text ranges,
+including wrapping, without replacing text or altering clipboard events. The ink
+is anchored in document coordinates and scrolls natively with its text, without
+scroll-time repainting or viewport lag. Clearing the selection removes the strokes. Native selection remains the
+fallback for forms, open dialogs, unavailable canvas and forced-colour modes.
+
+The full-width header is procedural antique cloth: muted sage and warm linen yarns
+with deeper green accents cross in a twill weave, with uneven dye, fine fibres
+and a lightly frayed cut edge with occasional loose ends.
+No texture images are loaded. Time-based local friction gently catches the weave;
+yarn tension limits stretching, a shallow crease follows the contact, and the cut
+edge yields more than the fixed upper and side hems. Fast strokes slip instead of
+building large waves. Motion settles with damping and stops updating when idle,
+hidden or offscreen.
+Reduced motion and unavailable WebGL retain a static, code-drawn weave.
+
+The footer is clad edge to edge in pale, warm oak boards laid at a gentle 14-degree
+diagonal, with staggered 240–360px lengths, flush with both sides and the bottom
+of the page. Each plank has its own
+seed, cut direction, irregular growth rings, long fibres, open vessels, satin rays,
+occasional knots and muted colour variation. The grain bends around knots; pore
+width stays small even near a ring's centre. Fine recessed joints and opposing
+bevel highlights share the same diagonal coordinates as the wood. There is no
+separate tabletop silhouette or outer drop shadow. Canvas generates the material
+entirely from code, without texture images, and stays static until resized.
+Footer text remains accessible HTML, with a static CSS fallback behind it.
+The cream page overlaps the wood with a subtly uneven paper edge, a fine exposed
+rim and a soft contact shadow. Its deterministic contour also supplies the cat's
+paw contacts, so the visible edge and landing surface stay aligned after resizing.
+
 The avatar uses a small vanilla JavaScript animation and SVG facial layers:
 its eyes follow the pointer and it blinks naturally. After four seconds without
 pointer movement, its tongue stays out until the pointer moves again. Animation pauses offscreen and in hidden tabs. Reduced-motion
@@ -65,7 +110,7 @@ lightbox mirrors the live rig and ongoing route, including walking and jumping;
 the cat leaves the frame naturally as it returns home. Closing the viewer does
 not restart or duplicate the cat's journey.
 
-Run `node --test tests/*.test.mjs` to check landing, route planning, and fusion.
+Run `node --test tests/*.test.mjs` to check cat interactions and cloth physics.
 
 ## Local preview
 

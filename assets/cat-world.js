@@ -1,6 +1,7 @@
 import { textContours, imageContour, contactAt, standingHeight, portraitRegions } from './cat-surfaces.js?v=eeb712b6';
 export { contactAt, standingHeight } from './cat-surfaces.js?v=eeb712b6';
 import { photoPlatforms } from './cat-photo-world.js?v=b3848364';
+import { paperEdgeAt } from './paper-edge.js?v=049ec4db';
 // The page is a set of one-way platforms: jumps pass through from below.
 export const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
 export function collectPlatforms(track) {
@@ -16,6 +17,11 @@ export function collectPlatforms(track) {
   };
   document.querySelectorAll('.header, .info-row, footer').forEach((el, i) => {
     const r = rect(el);
+    if (el.classList.contains('footer--wood')) {
+      const contour=Float64Array.from({length:Math.ceil(r.right-r.left)+1},(_,x)=>r.top+paperEdgeAt(x));
+      add(`rule-${i}`,r.left,r.right,Math.min(...contour),{profileLeft:r.left,contour});
+      return;
+    }
     add(el.id === 'research' ? 'home' : `rule-${i}`, r.left, r.right,
       el.classList.contains('header') ? el.getBoundingClientRect().bottom + scrollY : r.top);
   });
@@ -34,10 +40,11 @@ export function collectPlatforms(track) {
     })) add(p.id,p.left,p.right,p.y,p);
   });
   // Range rectangles preserve actual text wrapping, including responsive line breaks.
-  const walker = document.createTreeWalker(document.querySelector('.page'), NodeFilter.SHOW_TEXT);
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
   let text;
   let i = 0;
   while ((text = walker.nextNode())) {
+    if (!text.parentElement.closest('.header-inner, .page, .footer-inner')) continue;
     if (!text.textContent.trim() || text.parentElement.closest('.cat, svg, script, .skip-link, .hair-hint, .hair-status')) continue;
     const style = getComputedStyle(text.parentElement);
     if (style.visibility === 'hidden' || style.display === 'none') continue;

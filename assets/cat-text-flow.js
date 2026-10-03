@@ -127,7 +127,7 @@ export function createCatTextFlow(rig) {
   let layer = null, mask = null;
   let previousTime = 0;
   const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
-  const page = document.querySelector('.page');
+  const roots = [...document.querySelectorAll('.header-inner, .page, .footer-inner')];
   const changed = new MutationObserver(records => {
     if (active && records.some(record => {
       const el = record.target.nodeType === 1 ? record.target : record.target.parentElement;
@@ -148,7 +148,7 @@ export function createCatTextFlow(rig) {
     clearSources();
     const segmenter = new Intl.Segmenter(document.documentElement.lang || 'en', {granularity:'grapheme'});
     const metricsCache = new Map();
-    entries = [...page.querySelectorAll(targets)].map((element, id) => {
+    entries = roots.flatMap(root => [...root.querySelectorAll(targets)]).map((element, id) => {
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
       const fontSize = parseFloat(style.fontSize);
@@ -284,8 +284,8 @@ export function createCatTextFlow(rig) {
       try { mask = silhouette(rig); measure(); } catch (error) { stop(); console.warn('Cat text flow unavailable:', error); return; }
       active = true;
       previousTime = performance.now();
-      changed.observe(page, {subtree:true, childList:true, characterData:true,
-        attributes:true, attributeFilter:['style','class']});
+      roots.forEach(root => changed.observe(root, {subtree:true, childList:true, characterData:true,
+        attributes:true, attributeFilter:['style','class']}));
       frame = requestAnimationFrame(tick);
     },
     release() { active = false; changed.disconnect(); },

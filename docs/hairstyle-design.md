@@ -19,15 +19,20 @@ Coordinates were rounded to 0.01 units on the original 1254 × 1254 canvas.
 The resulting curves are stored in `assets/portrait-hairstyles.js`; the page has
 no tracing library or generated raster-image dependency at runtime.
 
-`assets/portrait-hair.js` separates the facial/clothing region from the hair with
-overlapping masks. Eyes and mouth use the existing independent expression layers.
-A static SVG snapshot keeps the existing portrait surface sampling in sync.
+`assets/portrait-hair.js` uses a continuous displacement field from
+`assets/portrait-hair-motion.js` for ruffling. The face, ear, neck and actual
+shoulder/collar contours are stationary anchors. Motion increases smoothly away
+from those contours, including along the complete right side lock. A narrow
+compositing window fades only where displacement is already nearly zero, so
+there is no rotating face cutout to expose seams above the ear or leave fixed
+hair tips. The moving layer includes an opaque background to erase its previous
+silhouette rather than leave doubled strands.
 
-The original mode uses the unchanged PNG as a stationary base and a feathered
-hair overlay. Ruffling rotates that overlay only, keeping the face and clothing
-fixed without seams at the fringe or collar. Its resting appearance is unchanged.
-An unfeathered exclusion covers both raised collar tips and their full swept area,
-preventing clothing pixels from leaking through the soft hair mask during rotation.
+At rest, the motion layer is hidden and the original PNG or traced path is drawn
+unchanged. During movement, the original stays exact over the stationary regions.
+Eyes and mouth retain their independent expression layers. Static snapshots for
+cat surface sampling exclude the motion layer. Maps are created once, the
+animation frame loop stops when settled, and reduced motion disables ruffling.
 
 The single-click, swipe, back-and-forth ruffle, double-tap reset, keyboard controls,
 local preference and reduced-motion support are retained.
